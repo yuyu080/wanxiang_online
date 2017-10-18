@@ -127,6 +127,11 @@ under the License.
 			</activation>
 			<dependencies>
 				<dependency>
+					<groupId>com.alibaba</groupId>
+					<artifactId>fastjson</artifactId>
+					<version>1.2.38</version>
+				</dependency>
+				<dependency>
 					<groupId>org.neo4j.driver</groupId>
 					<artifactId>neo4j-java-driver</artifactId>
 					<version>1.2.0</version>
