@@ -37,7 +37,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="WanxiangSinkToNeo4j.scala" pinned="false" current-in-tab="true">
+      <file leaf-file-name="WanxiangSinkToNeo4j.scala" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/scala/com/bbd/bigdata/WanxiangSinkToNeo4j.scala">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="322">
@@ -71,11 +71,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="app.scala" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/scala/app.scala">
+      <file leaf-file-name="app.scala" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/scala/com/bbd/bigdata/app.scala">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="115">
-              <caret line="5" column="66" lean-forward="false" selection-start-line="5" selection-start-column="51" selection-end-line="5" selection-end-column="66" />
+              <caret line="5" column="7" lean-forward="false" selection-start-line="5" selection-start-column="7" selection-end-line="5" selection-end-column="7" />
               <folding />
             </state>
           </provider>
@@ -159,6 +159,7 @@
         <option value="$PROJECT_DIR$/src/main/scala/com/bbd/bigdata/WanxiangSinkToNeo4j.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/com/bbd/bigdata/core/CypherToNeo4j.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/app.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/com/bbd/bigdata/app.scala" />
       </list>
     </option>
   </component>
@@ -312,24 +313,6 @@
               <item name="scala" type="462c0819:PsiDirectoryNode" />
               <item name="bigdata" type="462c0819:PsiDirectoryNode" />
             </path>
-            <path>
-              <item name="wanxiang_online" type="b2602c69:ProjectViewProjectNode" />
-              <item name="wanxiang_online" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="scala" type="462c0819:PsiDirectoryNode" />
-              <item name="bigdata" type="462c0819:PsiDirectoryNode" />
-              <item name="core" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="wanxiang_online" type="b2602c69:ProjectViewProjectNode" />
-              <item name="wanxiang_online" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="scala" type="462c0819:PsiDirectoryNode" />
-              <item name="bigdata" type="462c0819:PsiDirectoryNode" />
-              <item name="util" type="462c0819:PsiDirectoryNode" />
-            </path>
           </expand>
           <select />
         </subPane>
@@ -479,7 +462,7 @@
     </configuration>
     <configuration name="app" type="Application" factoryName="Application" temporary="true">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
-      <option name="MAIN_CLASS_NAME" value="app" />
+      <option name="MAIN_CLASS_NAME" value="com.bbd.bigdata.app" />
       <option name="VM_PARAMETERS" />
       <option name="PROGRAM_PARAMETERS" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
@@ -538,7 +521,7 @@
       <workItem from="1508209007858" duration="88000" />
       <workItem from="1508381961343" duration="12816000" />
       <workItem from="1508402212548" duration="6532000" />
-      <workItem from="1508409697154" duration="2528000" />
+      <workItem from="1508409697154" duration="2653000" />
     </task>
     <task id="LOCAL-00001" summary="check kafka conf">
       <created>1507688716642</created>
@@ -575,11 +558,18 @@
       <option name="project" value="LOCAL" />
       <updated>1508411798191</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="add app">
+      <created>1508412237142</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1508412237142</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="55859000" />
+    <option name="totallyTimeSpent" value="55984000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-9" y="-9" width="2578" height="1408" extended-state="6" />
@@ -624,7 +614,8 @@
     <MESSAGE value="check kafka conf" />
     <MESSAGE value="add neo4j sink" />
     <MESSAGE value="integrate all the module" />
-    <option name="LAST_COMMIT_MESSAGE" value="integrate all the module" />
+    <MESSAGE value="add app" />
+    <option name="LAST_COMMIT_MESSAGE" value="add app" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
@@ -1021,14 +1012,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/app.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="115">
-          <caret line="5" column="66" lean-forward="false" selection-start-line="5" selection-start-column="51" selection-end-line="5" selection-end-column="66" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/com/bbd/bigdata/WanxiangSinkToNeo4j.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="322">
@@ -1036,6 +1019,14 @@
           <folding>
             <element signature="e#25#76#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/com/bbd/bigdata/app.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="115">
+          <caret line="5" column="7" lean-forward="false" selection-start-line="5" selection-start-column="7" selection-end-line="5" selection-end-column="7" />
+          <folding />
         </state>
       </provider>
     </entry>
