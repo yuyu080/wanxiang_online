@@ -39,14 +39,16 @@ object WanxiangSinkToNeo4j {
         * Exception processing
         */
       //一个tuple接收数据，包含（table_name,List<cypher>）
-      val tuple_cypher_message = CypherToNeo4j.getCypher(in)
 
-      tuple_cypher_message._2(0) match {
+      val tuple_cypher_message = CypherToNeo4j.getCypher(in)
+      println(in)
+      tuple_cypher_message._2.foreach(print)
+      /*tuple_cypher_message._2(0) match {
         case "message_error" => put_kafka_topic(in)
         case _ => driver.session().writeTransaction(new TransactionWork[Integer]() {
           override def execute(tx: Transaction): Integer = createRelation(tx,tuple_cypher_message._2)
         })
-      }
+      }*/
 
 
     }

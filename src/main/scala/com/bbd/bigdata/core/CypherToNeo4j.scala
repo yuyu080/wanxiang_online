@@ -14,6 +14,7 @@ object CypherToNeo4j {
   def getCypher(arg: String): Tuple2[String, Array[String]] = {
     val obj = CommonFunctions.jsonToObj(arg)
     val table_name = obj.get("canal_table").toString
+    println(table_name)
     try {
       table_name match {
         case "qyxx_basic_canal" => qyxxBasic(obj)
@@ -72,7 +73,7 @@ object CypherToNeo4j {
 
       }
     } catch {
-      case ex: Exception => (table_name, Array("message_error"))
+      case ex: Exception => (table_name, Array(ex.toString))
     }
   }
 }
