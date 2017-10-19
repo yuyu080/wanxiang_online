@@ -25,7 +25,7 @@ object WanxiangSinkToNeo4j {
         * open方法是初始化方法，会在invoke方法之前执行，执行一次。
         */
       //neo4j 连接信息
-      val conn_addr = "bolt://10.28.52.151:7687"
+      val conn_addr = "bolt://neo4j.dwws.bbdops.com:7690"
       val user = "neo4j"
       val passwd = "123456"
       //加载驱动
@@ -40,12 +40,11 @@ object WanxiangSinkToNeo4j {
         */
       //一个tuple接收数据，包含（table_name,List<cypher>）
       val tuple_cypher_message = CypherToNeo4j.getCypher(in)
-      val cypher_list = tuple_cypher_message._2
 
       tuple_cypher_message._2(0) match {
         case "message_error" => put_kafka_topic(in)
         case _ => driver.session().writeTransaction(new TransactionWork[Integer]() {
-          override def execute(tx: Transaction): Option[Integer] = createRelation(tx,cypher_list)
+          override def execute(tx: Transaction): Integer = createRelation(tx,tuple_cypher_message._2)
         })
       }
 
@@ -65,32 +64,32 @@ object WanxiangSinkToNeo4j {
         val config = new ProducerConfig(props)
         val producer = new Producer[String, String](config)
         //put message to kafka topic
-        val message = new KeyedMessage[String, String]("wanxiang_exception_20171019", message)
-        producer.send(message)
+        val keyedMessage = new KeyedMessage[String, String]("wanxiang_exception_20171019",String.valueOf(System.currentTimeMillis()), message)
+        producer.send(keyedMessage)
       } catch {
         case e: Exception =>
           e.printStackTrace()
       }
     }
 
-    def createRelation(tx: Transaction, cypher_list: Array[String]): Option[Integer] = {
+    def createRelation(tx: Transaction, cypher_list: Array[String]): Integer = {
       /*接收cypher list 后，解析cypher
       * 所有cypher包含在一个事务里
-      * 顺序执行
+      * 顺序执行，异常捕获，0：异常，1：无异常
       * */
       try{
-        cypher_list.foreach(tx.run(_))
+        cypher_list.foreach(tx.run)
       }catch {
-        case e: Exception => e.printStackTrace();Some(1)
+        case e: Exception => e.printStackTrace();0
       }
-      None
+      1
     }
 
     override def close() {
       if(driver != null){
         driver.close()
       }
-      super.close();
+      super.close()
     }
 
   }
