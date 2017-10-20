@@ -52,6 +52,7 @@ object BaseOperate {
     val realcap_amount = info.get("realcap_amount").toString
 
     if (event_type == "DELETE") {
+      //企业节点不能被直接删除
       (
         table_name,
         Array(
@@ -86,18 +87,16 @@ object BaseOperate {
              |MERGE (a:Entity:Company {bbd_qyxx_id: "$bbd_qyxx_id" })
              |${CommonFunctions.getCompanyProperty("a")}
              |ON CREATE SET a.create_time = timestamp()
-             |SET a.is_human = False
-             |SET a.is_ipo = ${if(info.get("ipo_company") == "") "False" else "True"}
+             |SET a.is_ipo = ${if(info.get("ipo_company") == "") "false" else "true"}
              |SET a.name = "${info.get("company_name").toString}"
-             |SET a.isSOcompany = False
              |SET a.esdate = "${info.get("esdate").toString}"
-             |SET a.address = "${info.get("address").toString}"
-             |SET a.estatus = "${info.get("enterprise_status").toString}"
+             |SET a.address = "${info.get("address").toString.replace(",", "").replace("\"", "")}"
+             |SET a.estatus = "${info.get("enterprise_status").toString.replace(",", "，")}"
              |SET a.province = "$province_name"
              |SET a.city = "$city_name"
              |SET a.county = "$county_name"
              |SET a.Industry = "${info.get("company_industry").toString}"
-             |SET a.company_type = "${info.get("company_type").toString}"
+             |SET a.company_type = "${info.get("company_type").toString.replace(",", "").replace("\"", "")}"
              |SET a.regcap = ${if(regcap_amount == "") "0.0" else regcap_amount}
              |SET a.regcap_currency  = "${info.get("regcap_currency").toString}"
              |SET a.realcap = ${if(realcap_amount == "") "0.0" else realcap_amount}
@@ -105,19 +104,22 @@ object BaseOperate {
              |SET a.update_time = timestamp()
          """.stripMargin,
           s"""
-             |MATCH (a:Entity:Company {bbd_qyxx_id: "$bbd_qyxx_id" }),(b:Entity:Region {region_code : "$county" }),(e:Entity:Region {region_code : "$city"}),(f:Entity:Region {region_code : "$province" })
+             |MATCH (a:Entity:Company {bbd_qyxx_id: "$bbd_qyxx_id" }),(b:Entity:Region {region_code : "$county" }),(e:Entity:Region {region_code : "$city" }),(f:Entity:Region {region_code : "$province" })
              |MERGE (a)-[e1:BELONG]-(b)
              |ON CREATE SET b.company_num = b.company_num + 1
              |ON CREATE SET e.company_num = e.company_num + 1
              |ON CREATE SET f.company_num = f.company_num + 1
              |ON CREATE SET e1.create_time = timestamp()
-             |
+             |ON CREATE SET b.update_time = timestamp()
+             |ON CREATE SET e.update_time = timestamp()
+             |ON CREATE SET f.update_time = timestamp()
          """.stripMargin,
           s"""
              |MATCH (a:Entity:Company {bbd_qyxx_id: "$bbd_qyxx_id" }),(c:Entity:Industry {industry_code: "${info.get("company_industry").toString}" })
              |MERGE (a)-[e2:BELONG]-(c)
              |ON CREATE SET c.company_num = c.company_num + 1
              |ON CREATE SET e2.create_time = timestamp()
+             |ON CREATE SET c.update_time = timestamp()
          """.stripMargin
 
         )
@@ -175,11 +177,14 @@ object BaseOperate {
              |SET b.company_num = b.company_num - 1
              |SET e.company_num = e.company_num - 1
              |SET f.company_num = f.company_num - 1
-         """.stripMargin,
+             |SET b.update_time = timestamp()
+             |SET e.update_time = timestamp()
+             |SET f.update_time = timestamp()
+           """.stripMargin,
           s"""
              |MATCH (a:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })
              |DETACH DELETE a
-         """.stripMargin
+           """.stripMargin
         )
       )
 
@@ -210,6 +215,9 @@ object BaseOperate {
              |ON CREATE SET b.company_num = b.company_num + 1
              |ON CREATE SET e.company_num = e.company_num + 1
              |ON CREATE SET f.company_num = f.company_num + 1
+             |ON CREATE SET b.update_time = timestamp()
+             |ON CREATE SET e.update_time = timestamp()
+             |ON CREATE SET f.update_time = timestamp()
          """.stripMargin
         )
       )
@@ -243,6 +251,10 @@ object BaseOperate {
     val relation_type = event_table_name.toUpperCase
     val company_property_name = getCompanyNodePropertyName(event_table_name)
 
+    /*
+    * 1、首先判断该事件是否位于属性图中
+    * 2、然后判断该事件是否是企业节点的统计属性
+    * 3、根据上述问题生成不同的分支*/
     if(company_property_name != null) {
       if (event_type == "DELETE") {
         if(company_property_name != "") {
@@ -308,7 +320,6 @@ object BaseOperate {
             )
           )
         }
-
       } else {
         (table_name, Array("message_error"))
       }
@@ -360,7 +371,7 @@ object BaseOperate {
         s"""
            |MERGE (a:Entity:Person {bbd_qyxx_id: "${args("source_id")}" })
            |ON CREATE SET a.name = "${args("source_name")}"
-           |ON CREATE SET a.is_human = True
+           |${CommonFunctions.getPersonProperty("a")}
            |ON CREATE SET a.create_time = timestamp()
            |SET a.update_time = timestamp()
            |WITH a
@@ -379,10 +390,30 @@ object BaseOperate {
            |ON CREATE SET c.create_time = timestamp()
            |SET c.update_time = timestamp()
            |SET c.role_name = "${args("role_name")}"
+           |SET c.ratio = "${args("ratio")}"
            |WITH a,b,c
            |MERGE (d:Entity:Role:Isinvest {bbd_role_id: "${args("bbd_isinvest_role_id")}" })
            |ON CREATE SET d.create_time = timestamp()
            |SET d.relation_type = True
+           |SET a.dwtzxx = a.dwtzxx + 1
+           |SET b.gdxx = b.gdxx + 1
+           |SET a.update_time = timestamp()
+           |SET b.update_time = timestamp()
+           |SET d.update_time = timestamp()
+           |WITH a, b, c, d """.stripMargin
+    } else if (args("relation_type") == "BRANCH") {
+      step_two =
+        s"""
+           |MERGE (c:Entity:Role:${CommonFunctions.upperCase(args("relation_type").toLowerCase)} {bbd_role_id: "${args("bbd_role_id")}" })
+           |ON CREATE SET c.create_time = timestamp()
+           |SET c.update_time = timestamp()
+           |SET c.role_name = "${args("role_name")}"
+           |WITH a,b,c
+           |MERGE (d:Entity:Role:Isinvest {bbd_role_id: "${args("bbd_isinvest_role_id")}" })
+           |ON CREATE SET d.create_time = timestamp()
+           |ON CREATE SET d.relation_type = False
+           |SET b.fzjg = b.fzjg + 1
+           |SET b.update_time = timestamp()
            |SET d.update_time = timestamp()
            |WITH a, b, c, d """.stripMargin
     } else {
@@ -396,6 +427,8 @@ object BaseOperate {
            |MERGE (d:Entity:Role:Isinvest {bbd_role_id: "${args("bbd_isinvest_role_id")}" })
            |ON CREATE SET d.create_time = timestamp()
            |ON CREATE SET d.relation_type = False
+           |SET b.baxx = b.baxx + 1
+           |SET b.update_time = timestamp()
            |SET d.update_time = timestamp()
            |WITH a, b, c, d """.stripMargin
     }
@@ -406,11 +439,38 @@ object BaseOperate {
           args("table_name"),
           Array(
             s"""
-               |MATCH (c:Entity:Role:${CommonFunctions.upperCase(args("relation_type").toLowerCase)} {bbd_role_id: "${args("bbd_role_id")}" })
+               |MATCH
+               |(a:Entity:${args("source_label")} {bbd_qyxx_id: "${args("source_id")}" }),
+               |(c:Entity:Role:${CommonFunctions.upperCase(args("relation_type").toLowerCase)} {bbd_role_id: "${args("bbd_role_id")}" }),
+               |(b:Entity:Company {bbd_qyxx_id: "${args("destination_id")}" })
                |DETACH DELETE c
-               |WITH c
-               |MATCH (a:Entity:Company {bbd_qyxx_id: "${args("source_id")}" })-[:VIRTUAL]-(h:Entity:Role)-[:VIRTUAL]-(b:Entity:Company {bbd_qyxx_id: "${args("destination_id")}" })
+               |SET a.dwtzxx = a.dwtzxx - 1
+               |SET b.gdxx = b.gdxx - 1
+               |SET b.update_time = timestamp()
+               |SET a.update_time = timestamp()
+               |WITH a, b
+               |MATCH (a)-[:VIRTUAL]-(h:Entity:Role)-[:VIRTUAL]-(b)
                |SET h.relation_type = False
+               |WITH a, b, h
+               |WHERE NOT exists((a)-[:IS]-(:Entity:Role)-[:OF]-(b))
+               |DETACH DELETE h
+             """.stripMargin
+          )
+        )
+      } else if (args("relation_type") == "BRANCH") {
+        (
+          args("table_name"),
+          Array(
+            s"""
+               |MATCH
+               |(a:Entity:Company {bbd_qyxx_id: "${args("source_id")}" }),
+               |(c:Entity:Role:${CommonFunctions.upperCase(args("relation_type").toLowerCase)} {bbd_role_id: "${args("bbd_role_id")}" }),
+               |(b:Entity:Company {bbd_qyxx_id: "${args("destination_id")}" })
+               |DETACH DELETE c
+               |SET b.fzjg = b.fzjg - 1
+               |SET b.update_time = timestamp()
+               |WITH a, b
+               |MATCH (a)-[:VIRTUAL]-(h:Entity:Role)-[:VIRTUAL]-(b)
                |WITH a, b, h
                |WHERE NOT exists((a)-[:IS]-(:Entity:Role)-[:OF]-(b))
                |DETACH DELETE h
@@ -422,10 +482,15 @@ object BaseOperate {
           args("table_name"),
           Array(
             s"""
-               |MATCH (c:Entity:Role:${CommonFunctions.upperCase(args("relation_type").toLowerCase)} {bbd_role_id: "${args("bbd_role_id")}" })
+               |MATCH
+               |(a:Entity:${args("source_label")} {bbd_qyxx_id: "${args("source_id")}" }),
+               |(c:Entity:Role:${CommonFunctions.upperCase(args("relation_type").toLowerCase)} {bbd_role_id: "${args("bbd_role_id")}" }),
+               |(b:Entity:Company {bbd_qyxx_id: "${args("destination_id")}" })
                |DETACH DELETE c
-               |WITH c
-               |MATCH (a:Entity:Company {bbd_qyxx_id: "${args("source_id")}" })-[:VIRTUAL]-(h:Entity:Role)-[:VIRTUAL]-(b:Entity:Company {bbd_qyxx_id: "${args("destination_id")}" })
+               |SET b.baxx = b.baxx - 1
+               |SET b.update_time = timestamp()
+               |WITH a, b
+               |MATCH (a)-[:VIRTUAL]-(h:Entity:Role)-[:VIRTUAL]-(b)
                |WITH a, b, h
                |WHERE NOT exists((a)-[:IS]-(:Entity:Role)-[:OF]-(b))
                |DETACH DELETE h

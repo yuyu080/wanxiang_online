@@ -65,31 +65,32 @@ object CompositeOperate {
       "destination_id" -> destination_id,
       "bbd_role_id" -> bbd_role_id,
       "role_name" -> info.get("shareholder_type").toString,
-      "bbd_isinvest_role_id" -> bbd_isinvest_role_id
+      "bbd_isinvest_role_id" -> bbd_isinvest_role_id,
+      "ratio" -> info.get("invest_ratio").toString
     )
 
     BaseOperate.operateRelationEdge(args)
   }
 
   def qyxxBaxx(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-      val source_id = info.get("name_id").toString
-      val relation_type = info.get("type").toString.toUpperCase
-      val destination_id = info.get("bbd_qyxx_id").toString
-      val bbd_role_id = CommonFunctions.md5(source_id + destination_id + relation_type)
-      val bbd_isinvest_role_id = CommonFunctions.md5(source_id + destination_id + "Isinvest")
+    val source_id = info.get("name_id").toString
+    val relation_type = info.get("type").toString.toUpperCase
+    val destination_id = info.get("bbd_qyxx_id").toString
+    val bbd_role_id = CommonFunctions.md5(source_id + destination_id + relation_type)
+    val bbd_isinvest_role_id = CommonFunctions.md5(source_id + destination_id + "Isinvest")
 
-      val args  = Map(
-        "table_name" -> info.get("canal_table").toString.replace("_canal", ""),
-        "event_type" -> info.get("canal_eventtype").toString,
-        "source_label" -> "Person",
-        "source_id" -> source_id,
-        "source_name" -> info.get("name").toString,
-        "relation_type" -> relation_type,
-        "destination_id" -> destination_id,
-        "bbd_role_id" -> bbd_role_id,
-        "role_name" -> info.get("position").toString,
-        "bbd_isinvest_role_id" -> bbd_isinvest_role_id
-      )
+    val args  = Map(
+      "table_name" -> info.get("canal_table").toString.replace("_canal", ""),
+      "event_type" -> info.get("canal_eventtype").toString,
+      "source_label" -> "Person",
+      "source_id" -> source_id,
+      "source_name" -> info.get("name").toString,
+      "relation_type" -> relation_type,
+      "destination_id" -> destination_id,
+      "bbd_role_id" -> bbd_role_id,
+      "role_name" -> info.get("position").toString,
+      "bbd_isinvest_role_id" -> bbd_isinvest_role_id
+    )
 
     BaseOperate.operateRelationEdge(args)
   }
@@ -115,27 +116,6 @@ object CompositeOperate {
     )
 
     BaseOperate.operateRelationEdge(args)
-  }
-
-  def qyxxBgxx(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    //根据特殊规则，生成ID
-    val bbd_xgxx_id = CommonFunctions.md5 {
-      val bbd_qyxx_id = info.get("bbd_qyxx_id").toString
-      val change_date = info.get("change_date").toString
-      val change_items = info.get("change_items").toString
-      val content_before_change = info.get("content_before_change").toString
-      val content_after_change = info.get("content_after_change").toString
-      CommonFunctions.md5(
-        bbd_qyxx_id + change_date + change_items + content_before_change + content_after_change
-      )
-    }
-    val event_node_operation = BaseOperate.operateEventNode(info, id=bbd_xgxx_id)
-
-    info.put("bbd_table", "qyxx_bgxx")
-    info.put("bbd_xgxx_id", bbd_xgxx_id)
-    val event_edge_operation = BaseOperate.operateEventEdge(info)
-
-    (event_node_operation._1, event_node_operation._2 ++ event_edge_operation._2)
   }
 
   def qyxxStateOwnedEnterpriseBackground(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
@@ -222,19 +202,6 @@ object CompositeOperate {
     }
   }
 
-  def blackList(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    info.put("bbd_table", "black_list")
-    //节点附加属性
-    val event_info =
-      s"""
-         |SET a.property = ${info.get("property")}""".stripMargin
-    val event_node_operation: Tuple2[String, Array[String]] = BaseOperate.operateEventNode(info,
-                                                                                           event_info=event_info)
-    val event_edge_operation: Tuple2[String, Array[String]] = BaseOperate.operateEventEdge(info)
-
-    (event_node_operation._1, event_node_operation._2 ++ event_edge_operation._2)
-  }
-
   def baiduNews(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
     BaseOperate.operateEventNode(info)
   }
@@ -251,9 +218,6 @@ object CompositeOperate {
     BaseOperate.operateEventNode(info)
   }
 
-  def overseasInvestment(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
-  }
 
   def qylogo(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
     BaseOperate.operateEventNode(info)
@@ -356,6 +320,153 @@ object CompositeOperate {
   }
 
   def zpzzq(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
+    BaseOperate.operateEventNode(info)
+  }
+
+  def qyxxBgxx(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
+    //根据特殊规则，生成ID
+    val bbd_xgxx_id = CommonFunctions.md5 {
+      val bbd_qyxx_id = info.get("bbd_qyxx_id").toString
+      val change_date = info.get("change_date").toString
+      val change_items = info.get("change_items").toString
+      val content_before_change = info.get("content_before_change").toString
+      val content_after_change = info.get("content_after_change").toString
+      bbd_qyxx_id + change_date + change_items + content_before_change + content_after_change
+    }
+    val event_node_operation = BaseOperate.operateEventNode(info, id=bbd_xgxx_id)
+
+    info.put("bbd_table", "qyxx_bgxx")
+    info.put("bbd_xgxx_id", bbd_xgxx_id)
+    val event_edge_operation = BaseOperate.operateEventEdge(info)
+
+    (event_node_operation._1, event_node_operation._2 ++ event_edge_operation._2)
+  }
+
+  def blackList(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
+    info.put("bbd_table", "black_list")
+    //节点附加属性
+    val event_info =
+      s"""
+         |SET a.property = ${info.get("property")}""".stripMargin
+    val event_node_operation: Tuple2[String, Array[String]] = BaseOperate.operateEventNode(info,
+      event_info=event_info)
+    val event_edge_operation: Tuple2[String, Array[String]] = BaseOperate.operateEventEdge(info)
+
+    (event_node_operation._1, event_node_operation._2 ++ event_edge_operation._2)
+  }
+
+  def qyxxLiquidation(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
+    val bbd_xgxx_id = CommonFunctions.md5 {
+      val bbd_qyxx_id = info.get("bbd_qyxx_id").toString
+      val company_name = info.get("company_name").toString
+      val ligentity = info.get("ligentity").toString
+      val ligprincipal = info.get("ligprincipal").toString
+      val liqmen = info.get("liqmen").toString
+      val ligst = info.get("ligst").toString
+      val ligenddate = info.get("ligenddate").toString
+      val debttranee = info.get("debttranee").toString
+      val claimtranee = info.get("claimtranee").toString
+      bbd_qyxx_id + company_name + ligentity + ligprincipal + liqmen + ligst + ligenddate + debttranee + claimtranee
+    }
+    val event_node_operation = BaseOperate.operateEventNode(info, id=bbd_xgxx_id)
+
+    info.put("bbd_table", "qyxx_liquidation")
+    info.put("bbd_xgxx_id", bbd_xgxx_id)
+    val event_edge_operation = BaseOperate.operateEventEdge(info)
+
+    (event_node_operation._1, event_node_operation._2 ++ event_edge_operation._2)
+  }
+
+  def qyxxSharesfrost(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
+    val bbd_xgxx_id = CommonFunctions.md5 {
+      val bbd_qyxx_id = info.get("bbd_qyxx_id").toString
+      val company_name = info.get("company_name").toString
+      val frodocno = info.get("frodocno").toString
+      val froauth = info.get("froauth").toString
+      val frofrom = info.get("frofrom").toString
+      val froto = info.get("froto").toString
+      val froam = info.get("froam").toString
+      val thawauth = info.get("thawauth").toString
+      val thawdocno = info.get("thawdocno").toString
+      val thawdate = info.get("thawdate").toString
+      bbd_qyxx_id  + company_name + frodocno + froauth + frofrom + froto + froam + thawauth + thawdocno + thawdate
+    }
+    val event_node_operation = BaseOperate.operateEventNode(info, id=bbd_xgxx_id)
+
+    info.put("bbd_table", "qyxx_sharesfrost")
+    info.put("bbd_xgxx_id", bbd_xgxx_id)
+    val event_edge_operation = BaseOperate.operateEventEdge(info)
+
+    (event_node_operation._1, event_node_operation._2 ++ event_edge_operation._2)
+  }
+
+  def qyxgXzxk(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
+    BaseOperate.operateEventNode(info)
+  }
+
+  def qyxxSharesimpawn(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
+    val bbd_xgxx_id = CommonFunctions.md5 {
+      val bbd_qyxx_id = info.get("bbd_qyxx_id").toString
+      val company_name = info.get("company_name").toString
+      val imporg = info.get("imporg").toString
+      val imporgtype = info.get("imporgtype").toString
+      val impam = info.get("impam").toString
+      val imponrecdate = info.get("imponrecdate").toString
+      val impexaeep = info.get("impexaeep").toString
+      val impsandate = info.get("impsandate").toString
+      val impto = info.get("impto").toString
+      val morregcno = info.get("morregcno").toString
+      val imporg_idno = info.get("imporg_idno").toString
+      val pledgee = info.get("pledgee").toString
+      val pledgee_idno = info.get("pledgee_idno").toString
+      val impstate = info.get("impstate").toString
+      val impsituation = info.get("impsituation").toString
+      bbd_qyxx_id  + company_name + imporg + imporgtype + impam + imponrecdate + impexaeep + impsandate + impto + morregcno + imporg_idno + pledgee + pledgee_idno + impstate + impsituation
+    }
+    val event_node_operation = BaseOperate.operateEventNode(info, id=bbd_xgxx_id)
+
+    info.put("bbd_table", "qyxx_sharesimpawn")
+    info.put("bbd_xgxx_id", bbd_xgxx_id)
+    val event_edge_operation = BaseOperate.operateEventEdge(info)
+
+    (event_node_operation._1, event_node_operation._2 ++ event_edge_operation._2)
+  }
+
+  def qyxxMordetail(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
+    val bbd_xgxx_id = CommonFunctions.md5 {
+      val bbd_qyxx_id = info.get("bbd_qyxx_id").toString
+      val company_name = info.get("company_name").toString
+      val morreg_id = info.get("morreg_id").toString
+      val mortgagor = info.get("mortgagor").toString
+      val more = info.get("more").toString
+      val regorg = info.get("regorg").toString
+      val regidate = info.get("regidate").toString
+      val mortype = info.get("mortype").toString
+      val morregcno = info.get("morregcno").toString
+      val appregrea = info.get("appregrea").toString
+      val priclaseckind = info.get("priclaseckind").toString
+      val priclasecam = info.get("priclasecam").toString
+      val pefperform = info.get("pefperform").toString
+      val pefperto = info.get("pefperto").toString
+      val candate = info.get("candate").toString
+      val guaname = info.get("guaname").toString
+      val guadetali = info.get("guadetali").toString
+      bbd_qyxx_id + company_name + morreg_id + mortgagor + more + regorg + regidate + mortype + morregcno + appregrea + priclaseckind + priclasecam + pefperform + pefperto + candate + guaname + guadetali
+    }
+    val event_node_operation = BaseOperate.operateEventNode(info, id=bbd_xgxx_id)
+
+    info.put("bbd_table", "qyxx_mordetail")
+    info.put("bbd_xgxx_id", bbd_xgxx_id)
+    val event_edge_operation = BaseOperate.operateEventEdge(info)
+
+    (event_node_operation._1, event_node_operation._2 ++ event_edge_operation._2)
+  }
+
+  def domainNameWebsiteInfo(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
+    BaseOperate.operateEventNode(info)
+  }
+
+  def overseasInvestment(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
     BaseOperate.operateEventNode(info)
   }
 

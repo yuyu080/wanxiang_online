@@ -94,18 +94,54 @@ object CommonFunctions {
     new String(ch)
   }
 
-  //从配置文件中获取相应的属性值
-  def getCompanyProperty(alias_name: String): String = {
-    val company_properties = new Properties()
-    val in = this.getClass.getClassLoader.getResourceAsStream("event_to_company_property_map.properties")
-    company_properties.load(in)
-    company_properties.values.toArray.filter(
-      x => x != ""
-    ).map(
-      x => s"ON CREATE SET $alias_name.$x = 0"
+  def getPersonProperty(alias_name: String): String = {
+    val is_human = s"ON CREATE SET $alias_name.is_human = true"
+    val dwtzxx = s"ON CREATE SET $alias_name.dwtzxx = 0"
+
+    Array(
+      is_human,
+      dwtzxx
     ).reduce(
-      (x, y) => x+"\n"+y
+      (x, y) => x + "\n" + y
     )
   }
 
+  def getCompanyProperty(alias_name: String): String = {
+    //从配置文件中获取事件节点对应的企业节点属性值
+    val event_to_company_property = {
+      val company_properties = new Properties()
+      val in = this.getClass.getClassLoader.getResourceAsStream("event_to_company_property_map.properties")
+      company_properties.load(in)
+      company_properties.values.toArray.filter(
+        x => x != ""
+      ).map(
+        x => s"ON CREATE SET $alias_name.$x = 0"
+      ).reduce(
+        (x, y) => x+"\n"+y
+      )
+    }
+
+    //角色节点对应的企业节点属性值
+    val role_to_company_property = {
+      val dwtzxx = s"ON CREATE SET $alias_name.dwtzxx = 0"
+      val gdxx = s"ON CREATE SET $alias_name.gdxx = 0"
+      val baxx = s"ON CREATE SET $alias_name.baxx = 0"
+      dwtzxx + "\n" + gdxx + "\n" + baxx
+    }
+
+    //特殊类型对应的企业节点属性值
+    val special_to_company_property = {
+      val is_human = s"ON CREATE SET $alias_name.is_human = false"
+      val isSOcompany = s"ON CREATE SET $alias_name.isSOcompany = false"
+      is_human + "\n" + isSOcompany
+    }
+
+    Array(
+      event_to_company_property,
+      role_to_company_property,
+      special_to_company_property
+    ).reduce(
+      (x, y) => x + "\n" + y
+    )
+  }
 }
