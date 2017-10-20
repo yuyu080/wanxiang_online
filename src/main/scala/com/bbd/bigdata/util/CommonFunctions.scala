@@ -97,9 +97,8 @@ object CommonFunctions {
   //从配置文件中获取相应的属性值
   def getCompanyProperty(alias_name: String): String = {
     val company_properties = new Properties()
-    val region_path = this.getClass.getClassLoader.getResource(
-      "com/bbd/bigdata/core/event_to_company_property_map.properties").getPath
-    company_properties.load(new FileInputStream(region_path))
+    val in = this.getClass.getClassLoader.getResourceAsStream("event_to_company_property_map.properties")
+    company_properties.load(in)
     company_properties.values.toArray.filter(
       x => x != ""
     ).map(

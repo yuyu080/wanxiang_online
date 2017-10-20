@@ -18,9 +18,8 @@ object BaseOperate {
     //根据公司的区域编码，获取相应的省市区编码
     def getRegionInfo(company_county:String): Array[String] = Try {
       val region_properties = new Properties()
-      val region_path = this.getClass.getClassLoader.getResource(
-        "com/bbd/bigdata/core/region_map.properties").getPath
-      region_properties.load(new FileInputStream(region_path))
+      val in = this.getClass.getClassLoader.getResourceAsStream("region_map.properties")
+      region_properties.load(in)
       region_properties.getProperty(company_county).split("\\|")
     }.recover {
       case e: Throwable => Array("", "")
@@ -29,9 +28,8 @@ object BaseOperate {
     //获取地域名称
     def getRegionName(company_county:String): String = Try {
       val region_properties = new Properties()
-      val region_path = this.getClass.getClassLoader.getResource(
-        "com/bbd/bigdata/core/region_name.properties").getPath
-      region_properties.load(new FileInputStream(region_path))
+      val in = this.getClass.getClassLoader.getResourceAsStream("region_name.properties")
+      region_properties.load(in)
       new String(region_properties.getProperty(company_county).getBytes("ISO-8859-1"), "utf-8")
     }.recover {
       case e: Throwable => ""
@@ -141,9 +139,8 @@ object BaseOperate {
     //根据不同的表名，获取相应的事件时间字段
     def getEventColumn(table_name:String): String = Try {
       val event_time_properties = new Properties()
-      val region_path = this.getClass.getClassLoader.getResource(
-        "com/bbd/bigdata/core/event_time_map.properties").getPath
-      event_time_properties.load(new FileInputStream(region_path))
+      val in = this.getClass.getClassLoader.getResourceAsStream("event_time_map.properties")
+      event_time_properties.load(in)
       event_time_properties.getProperty(table_name)
     }.recover {
       case e: Throwable => ""
@@ -232,9 +229,8 @@ object BaseOperate {
      */
     def getCompanyNodePropertyName(event_table_name:String): String = {
       val event_properties = new Properties()
-      val region_path = this.getClass.getClassLoader.getResource(
-        "com/bbd/bigdata/core/event_to_company_property_map.properties").getPath
-      event_properties.load(new FileInputStream(region_path))
+      val in = this.getClass.getClassLoader.getResourceAsStream("event_to_company_property_map.properties")
+      event_properties.load(in)
       event_properties.getProperty(event_table_name)
     }
 
