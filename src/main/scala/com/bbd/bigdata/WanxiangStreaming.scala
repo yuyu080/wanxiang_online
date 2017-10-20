@@ -28,7 +28,7 @@ object WanxiangStreaming {
     //定义kafka 配置,KAFKA_BROKER和消费组
     val KAFKA_BROKER = "10.28.40.11:9092,10.28.40.12:9092,10.28.40.13:9092,10.28.40.14:9092,10.28.40.15:9092"
     //val KAFKA_BROKER = "10.28.200.107:9092,10.28.200.108:9092,10.28.200.109:9092"
-    val TRANSACTION_GROUP = "bbd_wanxiang_20171010"
+    val TRANSACTION_GROUP = "bbd_wanxiang_20171020"
 
     //初始化kafka topic
     val kafkaProps = new Properties()
@@ -39,7 +39,7 @@ object WanxiangStreaming {
     //添加source
     val streamingMessages = env.addSource(
       //wanxiang_canal_20170919
-      new FlinkKafkaConsumer010[String]("canal_topic2", new SimpleStringSchema(), kafkaProps)).addSink(new WanxiangSinkToNeo4j())
+      new FlinkKafkaConsumer010[String]("wanxiang_canal_20170919", new SimpleStringSchema(), kafkaProps)).addSink(new WanxiangSinkToNeo4j())
 
     //streamingMessages.print()
     env.execute("Wanxiang streaming data processing")

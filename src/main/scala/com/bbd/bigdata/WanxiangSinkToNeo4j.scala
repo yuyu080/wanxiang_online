@@ -25,7 +25,7 @@ object WanxiangSinkToNeo4j {
         * open方法是初始化方法，会在invoke方法之前执行，执行一次。
         */
       //neo4j 连接信息
-      val conn_addr = "bolt://neo4j.dwws.bbdops.com:7690"
+      val conn_addr = "bolt://10.28.52.151:7690"
       val user = "neo4j"
       val passwd = "123456"
       //加载驱动
@@ -39,17 +39,15 @@ object WanxiangSinkToNeo4j {
         * Exception processing
         */
       //一个tuple接收数据，包含（table_name,List<cypher>）
-
       val tuple_cypher_message = CypherToNeo4j.getCypher(in)
 
       tuple_cypher_message._2(0) match {
-        case "message_error" => put_kafka_topic(in)
+        case "NO_PROCESSING_METHOD" =>
+        case "MESSAGE_ERROR" => put_kafka_topic(in)
         case _ => driver.session().writeTransaction(new TransactionWork[Integer]() {
           override def execute(tx: Transaction): Integer = createRelation(tx,tuple_cypher_message._2)
         })
       }
-
-
     }
 
     def put_kafka_topic(message : String): Unit ={
