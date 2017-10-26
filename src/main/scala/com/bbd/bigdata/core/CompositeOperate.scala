@@ -5,11 +5,11 @@ import com.bbd.bigdata.util.CommonFunctions
 /**
   * Created by Administrator on 2017/10/11.
   */
-object CompositeOperate {
+object CompositeOperate extends BaseOperate {
 
   def qyxxBasic(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
     //操作企业节点
-    val company_node_operation: Tuple2[String, Array[String]] = BaseOperate.operateCompanyNode(info)
+    val company_node_operation: Tuple2[String, Array[String]] = operateCompanyNode(info)
 
     //操作角色节点、关系
     val source_id = info.get("frname_id").toString
@@ -34,14 +34,14 @@ object CompositeOperate {
       "bbd_isinvest_role_id" -> bbd_isinvest_role_id
     )
 
-    val old_relation_edge_operation = BaseOperate.operateRelationEdge(args)
+    val old_relation_edge_operation = operateRelationEdge(args)
 
     (company_node_operation._1, company_node_operation._2 ++ old_relation_edge_operation._2)
 
   }
 
   def xgxxRelation(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventEdge(info)
+    operateEventEdge(info)
   }
 
   def qyxxGdxx(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
@@ -69,7 +69,7 @@ object CompositeOperate {
       "ratio" -> info.get("invest_ratio").toString
     )
 
-    BaseOperate.operateRelationEdge(args)
+    operateRelationEdge(args)
   }
 
   def qyxxBaxx(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
@@ -92,7 +92,7 @@ object CompositeOperate {
       "bbd_isinvest_role_id" -> bbd_isinvest_role_id
     )
 
-    BaseOperate.operateRelationEdge(args)
+    operateRelationEdge(args)
   }
 
   def qyxxFzjgMerge(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
@@ -115,7 +115,7 @@ object CompositeOperate {
       "bbd_isinvest_role_id" -> bbd_isinvest_role_id
     )
 
-    BaseOperate.operateRelationEdge(args)
+    operateRelationEdge(args)
   }
 
   def qyxxStateOwnedEnterpriseBackground(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
@@ -163,7 +163,7 @@ object CompositeOperate {
         )
       )
     } else {
-      (table_name, Array("message_error"))
+      (table_name, Array("MESSAGE_ERROR"))
     }
   }
 
@@ -198,129 +198,129 @@ object CompositeOperate {
         )
       )
     } else {
-      (table_name, Array("message_error"))
+      (table_name, Array("MESSAGE_ERROR"))
     }
   }
 
   def baiduNews(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def dcos(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def dishonesty(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def ktgg(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
 
   def qylogo(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def qyxgCircxzcf(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def qyxgJyyc(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def qyxgQyqs(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def qyxgYuqing(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def qyxgYuqingMain(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def qyxxFinanceXkz(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def qyxxWanfangZhuanli(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def qyxxZhuanli(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def recruit(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def rjzzq(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def rmfygg(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def sfpmTaobao(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def shgyTdcr(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def shgyZhaobjg(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def shgyZhongbjg(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def simutong(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def tddkgs(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def tddy(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def tdzr(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def xgxxShangbiao(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def xzcf(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def zgcpwsw(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def zhixing(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def zhuanliZhuanyi(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def zpzzq(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def qyxxBgxx(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
@@ -333,11 +333,11 @@ object CompositeOperate {
       val content_after_change = info.get("content_after_change").toString
       bbd_qyxx_id + change_date + change_items + content_before_change + content_after_change
     }
-    val event_node_operation = BaseOperate.operateEventNode(info, id=bbd_xgxx_id)
+    val event_node_operation = operateEventNode(info, id=bbd_xgxx_id)
 
     info.put("bbd_table", "qyxx_bgxx")
     info.put("bbd_xgxx_id", bbd_xgxx_id)
-    val event_edge_operation = BaseOperate.operateEventEdge(info)
+    val event_edge_operation = operateEventEdge(info)
 
     (event_node_operation._1, event_node_operation._2 ++ event_edge_operation._2)
   }
@@ -348,9 +348,9 @@ object CompositeOperate {
     val event_info =
       s"""
          |SET a.property = ${info.get("property")}""".stripMargin
-    val event_node_operation: Tuple2[String, Array[String]] = BaseOperate.operateEventNode(info,
+    val event_node_operation: Tuple2[String, Array[String]] = operateEventNode(info,
       event_info=event_info)
-    val event_edge_operation: Tuple2[String, Array[String]] = BaseOperate.operateEventEdge(info)
+    val event_edge_operation: Tuple2[String, Array[String]] = operateEventEdge(info)
 
     (event_node_operation._1, event_node_operation._2 ++ event_edge_operation._2)
   }
@@ -368,11 +368,11 @@ object CompositeOperate {
       val claimtranee = info.get("claimtranee").toString
       bbd_qyxx_id + company_name + ligentity + ligprincipal + liqmen + ligst + ligenddate + debttranee + claimtranee
     }
-    val event_node_operation = BaseOperate.operateEventNode(info, id=bbd_xgxx_id)
+    val event_node_operation = operateEventNode(info, id=bbd_xgxx_id)
 
     info.put("bbd_table", "qyxx_liquidation")
     info.put("bbd_xgxx_id", bbd_xgxx_id)
-    val event_edge_operation = BaseOperate.operateEventEdge(info)
+    val event_edge_operation = operateEventEdge(info)
 
     (event_node_operation._1, event_node_operation._2 ++ event_edge_operation._2)
   }
@@ -391,17 +391,17 @@ object CompositeOperate {
       val thawdate = info.get("thawdate").toString
       bbd_qyxx_id  + company_name + frodocno + froauth + frofrom + froto + froam + thawauth + thawdocno + thawdate
     }
-    val event_node_operation = BaseOperate.operateEventNode(info, id=bbd_xgxx_id)
+    val event_node_operation = operateEventNode(info, id=bbd_xgxx_id)
 
     info.put("bbd_table", "qyxx_sharesfrost")
     info.put("bbd_xgxx_id", bbd_xgxx_id)
-    val event_edge_operation = BaseOperate.operateEventEdge(info)
+    val event_edge_operation = operateEventEdge(info)
 
     (event_node_operation._1, event_node_operation._2 ++ event_edge_operation._2)
   }
 
   def qyxgXzxk(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def qyxxSharesimpawn(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
@@ -423,11 +423,11 @@ object CompositeOperate {
       val impsituation = info.get("impsituation").toString
       bbd_qyxx_id  + company_name + imporg + imporgtype + impam + imponrecdate + impexaeep + impsandate + impto + morregcno + imporg_idno + pledgee + pledgee_idno + impstate + impsituation
     }
-    val event_node_operation = BaseOperate.operateEventNode(info, id=bbd_xgxx_id)
+    val event_node_operation = operateEventNode(info, id=bbd_xgxx_id)
 
     info.put("bbd_table", "qyxx_sharesimpawn")
     info.put("bbd_xgxx_id", bbd_xgxx_id)
-    val event_edge_operation = BaseOperate.operateEventEdge(info)
+    val event_edge_operation = operateEventEdge(info)
 
     (event_node_operation._1, event_node_operation._2 ++ event_edge_operation._2)
   }
@@ -453,65 +453,65 @@ object CompositeOperate {
       val guadetali = info.get("guadetali").toString
       bbd_qyxx_id + company_name + morreg_id + mortgagor + more + regorg + regidate + mortype + morregcno + appregrea + priclaseckind + priclasecam + pefperform + pefperto + candate + guaname + guadetali
     }
-    val event_node_operation = BaseOperate.operateEventNode(info, id=bbd_xgxx_id)
+    val event_node_operation = operateEventNode(info, id=bbd_xgxx_id)
 
     info.put("bbd_table", "qyxx_mordetail")
     info.put("bbd_xgxx_id", bbd_xgxx_id)
-    val event_edge_operation = BaseOperate.operateEventEdge(info)
+    val event_edge_operation = operateEventEdge(info)
 
     (event_node_operation._1, event_node_operation._2 ++ event_edge_operation._2)
   }
 
   def domainNameWebsiteInfo(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def overseasInvestment(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def qyxxNbJbxx(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def qyxxNbGzsm(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def qyxxNbCzxx(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def qyxxNbWzxx(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def qyxxNbFzjg(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def qyxxNbTzxx(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def qyxxNbZcxx(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def qyxxNbDbxx(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def qyxxNbXgxx(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def qyxxNbXzxk(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
   def qyxxNbBgxx(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    BaseOperate.operateEventNode(info)
+    operateEventNode(info)
   }
 
 }

@@ -1,6 +1,5 @@
 package com.bbd.bigdata.core
 
-import java.io.FileInputStream
 import java.util.Properties
 
 import com.bbd.bigdata.util.CommonFunctions
@@ -11,7 +10,7 @@ import scala.util.Try
 /**
   * Created by Administrator on 2017/10/11.
   */
-object BaseOperate {
+trait BaseOperate {
 
   def operateCompanyNode(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
 
@@ -127,7 +126,7 @@ object BaseOperate {
     } else {
       (
         table_name,
-        Array("message_error")
+        Array("MESSAGE_ERROR")
       )
     }
 
@@ -224,7 +223,7 @@ object BaseOperate {
     } else {
       (
         table_name,
-        Array("message_error")
+        Array("MESSAGE_ERROR")
       )
     }
   }
@@ -321,7 +320,7 @@ object BaseOperate {
           )
         }
       } else {
-        (table_name, Array("message_error"))
+        (table_name, Array("MESSAGE_ERROR"))
       }
     } else {
       (
@@ -380,7 +379,7 @@ object BaseOperate {
            |ON CREATE SET b.create_time = timestamp()
            |WITH a, b """.stripMargin
     } else {
-      return (args("table_name"), Array("message_error"))
+      return (args("table_name"), Array("MESSAGE_ERROR"))
     }
 
     if(args("relation_type") == "INVEST") {
@@ -501,7 +500,7 @@ object BaseOperate {
     } else if(args("event_type") == "INSERT" | args("event_type") == "UPDATE") {
       (args("table_name"), Array(step_one + step_two + step_three))
     } else {
-      (args("table_name"), Array("message_error"))
+      (args("table_name"), Array("MESSAGE_ERROR"))
     }
 
   }
