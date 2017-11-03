@@ -369,9 +369,9 @@ trait BaseOperate {
       step_one =
         s"""
            |MERGE (a:Entity:Person {bbd_qyxx_id: "${args("source_id")}" })
-           |ON CREATE SET a.name = "${args("source_name")}"
            |${CommonFunctions.getPersonProperty("a")}
            |ON CREATE SET a.create_time = timestamp()
+           |SET a.name = "${args("source_name")}"
            |SET a.update_time = timestamp()
            |WITH a
            |MERGE (b:Entity:Company {bbd_qyxx_id: "${args("destination_id")}" })

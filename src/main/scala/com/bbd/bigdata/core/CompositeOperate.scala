@@ -339,7 +339,7 @@ object CompositeOperate extends BaseOperate {
     info.put("bbd_xgxx_id", bbd_xgxx_id)
     val event_edge_operation = operateEventEdge(info)
 
-    (event_node_operation._1, event_node_operation._2 ++ event_edge_operation._2)
+    (event_node_operation._1, event_edge_operation._2 ++ event_node_operation._2)
   }
 
   def blackList(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
@@ -352,7 +352,7 @@ object CompositeOperate extends BaseOperate {
       event_info=event_info)
     val event_edge_operation: Tuple2[String, Array[String]] = operateEventEdge(info)
 
-    (event_node_operation._1, event_node_operation._2 ++ event_edge_operation._2)
+    (event_node_operation._1, event_edge_operation._2 ++ event_node_operation._2)
   }
 
   def qyxxLiquidation(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
@@ -374,7 +374,7 @@ object CompositeOperate extends BaseOperate {
     info.put("bbd_xgxx_id", bbd_xgxx_id)
     val event_edge_operation = operateEventEdge(info)
 
-    (event_node_operation._1, event_node_operation._2 ++ event_edge_operation._2)
+    (event_node_operation._1, event_edge_operation._2 ++ event_node_operation._2)
   }
 
   def qyxxSharesfrost(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
@@ -397,7 +397,7 @@ object CompositeOperate extends BaseOperate {
     info.put("bbd_xgxx_id", bbd_xgxx_id)
     val event_edge_operation = operateEventEdge(info)
 
-    (event_node_operation._1, event_node_operation._2 ++ event_edge_operation._2)
+    (event_node_operation._1, event_edge_operation._2 ++ event_node_operation._2)
   }
 
   def qyxgXzxk(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
@@ -429,7 +429,7 @@ object CompositeOperate extends BaseOperate {
     info.put("bbd_xgxx_id", bbd_xgxx_id)
     val event_edge_operation = operateEventEdge(info)
 
-    (event_node_operation._1, event_node_operation._2 ++ event_edge_operation._2)
+    (event_node_operation._1, event_edge_operation._2 ++ event_node_operation._2)
   }
 
   def qyxxMordetail(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
@@ -459,7 +459,7 @@ object CompositeOperate extends BaseOperate {
     info.put("bbd_xgxx_id", bbd_xgxx_id)
     val event_edge_operation = operateEventEdge(info)
 
-    (event_node_operation._1, event_node_operation._2 ++ event_edge_operation._2)
+    (event_node_operation._1, event_edge_operation._2 ++ event_node_operation._2)
   }
 
   def domainNameWebsiteInfo(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
