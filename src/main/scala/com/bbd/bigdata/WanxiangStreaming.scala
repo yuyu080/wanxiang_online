@@ -18,7 +18,7 @@ object WanxiangStreaming {
     * */
     //环境参数定义
     val env = StreamExecutionEnvironment.getExecutionEnvironment
-    env.enableCheckpointing(100)
+    env.enableCheckpointing(1000)
     env.getCheckpointConfig.setMaxConcurrentCheckpoints(1)
     env.setRestartStrategy(RestartStrategies.fallBackRestart())
 
@@ -26,8 +26,8 @@ object WanxiangStreaming {
     env.getCheckpointConfig.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE)
 
     //定义kafka 配置,KAFKA_BROKER和消费组
-    val KAFKA_BROKER = "10.28.40.11:9092,10.28.40.12:9092,10.28.40.13:9092,10.28.40.14:9092,10.28.40.15:9092"
-    //val KAFKA_BROKER = "10.28.200.107:9092,10.28.200.108:9092,10.28.200.109:9092"
+    //val KAFKA_BROKER = "10.28.40.11:9092,10.28.40.12:9092,10.28.40.13:9092,10.28.40.14:9092,10.28.40.15:9092"
+    val KAFKA_BROKER = "10.28.200.107:9092,10.28.200.108:9092,10.28.200.109:9092"
     val TRANSACTION_GROUP = "bbd_wanxiang_20171020"
 
     //初始化kafka topic
