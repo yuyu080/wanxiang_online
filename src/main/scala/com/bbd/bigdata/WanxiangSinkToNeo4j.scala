@@ -25,7 +25,7 @@ object WanxiangSinkToNeo4j {
         * open方法是初始化方法，会在invoke方法之前执行，执行一次。
         */
       //neo4j 连接信息
-      val conn_addr = "bolt://10.28.102.32:7690"
+      val conn_addr = "bolt://10.28.102.32:7687"
       val user = "neo4j"
       val passwd = "fyW1KFSYNfxRtw1ivAJOrnV3AKkaQUfB"
       //加载驱动
