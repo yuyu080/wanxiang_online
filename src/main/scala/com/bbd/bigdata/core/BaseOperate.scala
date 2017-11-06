@@ -328,6 +328,7 @@ trait BaseOperate {
         Array(
           s"""
              |MATCH (a:Entity:Company {bbd_qyxx_id: "$bbd_qyxx_id"})-[e1:$relation_type]->(b:Entity:Event:Ktgg {bbd_event_id: "$bbd_xgxx_id" })
+             |RETURN a
            """.stripMargin
         )
       )
