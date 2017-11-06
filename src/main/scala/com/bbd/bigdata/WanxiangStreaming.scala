@@ -1,8 +1,11 @@
 package com.bbd.bigdata
 
 import java.util.Properties
+import java.util.concurrent.TimeUnit
+
 import com.bbd.bigdata.WanxiangSinkToNeo4j.WanxiangSinkToNeo4j
 import org.apache.flink.api.common.restartstrategy.RestartStrategies
+import org.apache.flink.api.common.time.Time
 import org.apache.flink.streaming.api.CheckpointingMode
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010
 import org.apache.flink.streaming.util.serialization.SimpleStringSchema
@@ -20,8 +23,8 @@ object WanxiangStreaming {
     val env = StreamExecutionEnvironment.getExecutionEnvironment
     env.enableCheckpointing(1000)
     env.getCheckpointConfig.setMaxConcurrentCheckpoints(1)
-    env.setRestartStrategy(RestartStrategies.fallBackRestart())
-
+    env.setRestartStrategy(RestartStrategies.fixedDelayRestart(3,Time.of(10,TimeUnit.SECONDS)))
+    //env.setRestartStrategy(RestartStrategies.fixedDelayRestart(3,Time.of(10,TimeUnit.SECONDS)))
     //flink exactly_once
     env.getCheckpointConfig.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE)
 
