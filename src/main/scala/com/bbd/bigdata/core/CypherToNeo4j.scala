@@ -55,7 +55,6 @@ object CypherToNeo4j {
         case "zpzzq_canal" => zpzzq(obj)
 
         case "qyxx_bgxx_canal" => qyxxBgxx(obj)
-        case "black_list_canal" => blackList(obj)
         case "qyxx_liquidation_canal" => qyxxLiquidation(obj)
         case "qyxx_sharesfrost_canal" => qyxxSharesfrost(obj)
         case "qyxg_xzxk_canal" => qyxgXzxk(obj)

@@ -342,19 +342,6 @@ object CompositeOperate extends BaseOperate {
     (event_node_operation._1, event_edge_operation._2 ++ event_node_operation._2)
   }
 
-  def blackList(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    info.put("bbd_table", "black_list")
-    //节点附加属性
-    val event_info =
-      s"""
-         |SET a.property = ${info.get("property")}""".stripMargin
-    val event_node_operation: Tuple2[String, Array[String]] = operateEventNode(info,
-      event_info=event_info)
-    val event_edge_operation: Tuple2[String, Array[String]] = operateEventEdge(info)
-
-    (event_node_operation._1, event_edge_operation._2 ++ event_node_operation._2)
-  }
-
   def qyxxLiquidation(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
     val bbd_xgxx_id = CommonFunctions.md5 {
       val bbd_qyxx_id = info.get("bbd_qyxx_id").toString
