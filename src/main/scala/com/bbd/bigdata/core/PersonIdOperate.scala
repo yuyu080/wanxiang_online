@@ -16,7 +16,7 @@ object PersonIdOperate {
         s"""
            |MATCH (a:Person {bbd_qyxx_id: "$old_person_id" })-[]->(:Role)-[]->(d:Company {bbd_qyxx_id: "$bbd_qyxx_id" })
            |MERGE (b:Person {bbd_qyxx_id: "$new_person_id" })
-           |${CommonFunctions.getCompanyProperty("b")}
+           |${CommonFunctions.getPersonProperty("b")}
            |ON CREATE SET b.create_time = timestamp()
            |WITH a,b
            |MATCH (a)-[:IS]->(e:Role)-[:OF]->(c:Company)
