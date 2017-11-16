@@ -324,11 +324,12 @@ object CompositeOperate extends BaseOperate {
     //根据特殊规则，生成ID
     val bbd_xgxx_id = CommonFunctions.md5 {
       val bbd_qyxx_id = info.get("bbd_qyxx_id").toString
+      val company_name = info.get("company_name").toString
       val change_date = info.get("change_date").toString
       val change_items = info.get("change_items").toString
       val content_before_change = info.get("content_before_change").toString
       val content_after_change = info.get("content_after_change").toString
-      bbd_qyxx_id + change_date + change_items + content_before_change + content_after_change
+      bbd_qyxx_id + company_name + change_date + change_items + content_before_change + content_after_change
     }
     val event_node_operation = operateEventNode(info, id=bbd_xgxx_id)
 
