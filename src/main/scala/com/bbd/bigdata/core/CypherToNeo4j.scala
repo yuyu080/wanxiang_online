@@ -24,7 +24,6 @@ object CypherToNeo4j {
         case "qyxx_baxx_canal" => qyxxBaxx(obj)
         case "qyxx_fzjg_merge_canal" => qyxxFzjgMerge(obj)
 
-        case "baidu_news_canal" => baiduNews(obj)
         case "dcos_canal" => dcos(obj)
         case "dishonesty_canal" => dishonesty(obj)
         case "ktgg_canal" => ktgg(obj)

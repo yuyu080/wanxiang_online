@@ -202,9 +202,6 @@ object CompositeOperate extends BaseOperate {
     }
   }
 
-  def baiduNews(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    operateEventNode(info)
-  }
 
   def dcos(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
     operateEventNode(info)
