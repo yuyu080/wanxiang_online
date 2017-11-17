@@ -95,7 +95,7 @@ trait BaseOperate {
              |SET a.city = "$city_name"
              |SET a.county = "$county_name"
              |SET a.Industry = "${info.get("company_industry").toString}"
-             |SET a.company_type = "${info.get("company_type").toString.replace(",", "").replace("\"", "")}"
+             |SET a.company_type = "${info.get("company_companytype").toString.replace(",", "").replace("\"", "")}"
              |SET a.regcap = ${if(regcap_amount == "") "0.0" else regcap_amount}
              |SET a.regcap_currency  = "${info.get("regcap_currency").toString}"
              |SET a.realcap = ${if(realcap_amount == "") "0.0" else realcap_amount}
