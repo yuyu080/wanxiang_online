@@ -498,5 +498,9 @@ object CompositeOperate extends BaseOperate {
   def qyxxNbBgxx(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
     operateEventNode(info)
   }
+  def blackList(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
+    val bbd_qyxx_id = info.get("bbd_qyxx_id").toString
+    ("black_list", Array("SINK_TO_REDIS",bbd_qyxx_id))
+  }
 
 }

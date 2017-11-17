@@ -38,6 +38,8 @@ object WanxiangStreaming {
     //kafkaProps.load(ClassLoader.getSystemResourceAsStream("consumer.properties"))
     kafkaProps.setProperty("bootstrap.servers", KAFKA_BROKER)
     kafkaProps.setProperty("group.id", TRANSACTION_GROUP)
+    kafkaProps.setProperty("auto.offset.reset", "earliest")
+    kafkaProps.setProperty("fetch.message.max.bytes", "104857600")
 
     //添加source
     val streamingMessages = env.addSource(

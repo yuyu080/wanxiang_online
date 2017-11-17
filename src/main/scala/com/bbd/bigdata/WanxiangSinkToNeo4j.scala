@@ -5,11 +5,14 @@ import org.apache.flink.streaming.api.functions.sink.RichSinkFunction
 import org.neo4j.driver.v1._
 import org.neo4j.driver.v1.Config
 import java.util.concurrent.TimeUnit._
+
 import com.bbd.bigdata.core.CypherToNeo4j
 import java.util.Properties
+
 import kafka.producer.ProducerConfig
 import kafka.producer.Producer
 import kafka.producer.KeyedMessage
+import com.bbd.bigdata.redis.RedisUtil
 
 object WanxiangSinkToNeo4j {
   /*
@@ -46,10 +49,26 @@ object WanxiangSinkToNeo4j {
       tuple_cypher_message._2(0) match {
         case "NO_PROCESSING_METHOD" =>
         case "MESSAGE_ERROR" => put_kafka_topic(in)
+        case "SINK_TO_REDIS" => put_blacklist_redis(tuple_cypher_message._2(1))
         case _ => driver.session().writeTransaction(new TransactionWork[Integer]() {
           override def execute(tx: Transaction): Integer = createRelation(tx,tuple_cypher_message._2)
         })
       }
+    }
+
+    def put_blacklist_redis(bbd_qyxx_id: String): Unit = {
+      /*
+        * 黑名单处理
+        * 接收blcak_list表中qyxx_id
+        * 将其写入redis 一个value的set
+        * */
+      try{
+        RedisUtil.getJedis.sadd("wx_graph_black_set",bbd_qyxx_id)
+      }catch {
+        case e: Exception =>
+          e.printStackTrace()
+      }
+
     }
 
     def put_kafka_topic(message : String): Unit ={
