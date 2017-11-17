@@ -90,7 +90,7 @@ trait BaseOperate {
              |SET a.name = "${info.get("company_name").toString}"
              |SET a.esdate = "${info.get("esdate").toString}"
              |SET a.address = "${info.get("address").toString.replace(",", "").replace("\"", "")}"
-             |SET a.estatus = "${info.get("enterprise_status").toString.replace(",", "，")}"
+             |SET a.estatus = "${info.get("company_enterprise_status").toString.replace(",", "，")}"
              |SET a.province = "$province_name"
              |SET a.city = "$city_name"
              |SET a.county = "$county_name"
