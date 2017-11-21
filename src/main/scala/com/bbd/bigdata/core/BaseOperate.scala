@@ -342,13 +342,13 @@ trait BaseOperate {
     var step_two = ""
     val step_three =
       s"""
-         |MERGE (a)-[e1:IS]->(c)
+         |MERGE (a)-[e1:${args("relation_type")}]->(c)
          |ON CREATE SET e1.create_time = timestamp()
          |WITH a, b, c, d
          |MERGE (a)-[e2:VIRTUAL]->(d)
          |ON CREATE SET e2.create_time = timestamp()
          |WITH a, b, c, d
-         |MERGE (c)-[e3:OF]->(b)
+         |MERGE (c)-[e3:${args("relation_type")}]->(b)
          |ON CREATE SET e3.create_time = timestamp()
          |WITH a, b, c, d
          |MERGE (d)-[e4:VIRTUAL]->(b)
@@ -452,7 +452,7 @@ trait BaseOperate {
                |MATCH (a)-[:VIRTUAL]-(h:Entity:Role)-[:VIRTUAL]-(b)
                |SET h.relation_type = False
                |WITH a, b, h
-               |WHERE NOT exists((a)-[:IS]-(:Entity:Role)-[:OF]-(b))
+               |WHERE NOT exists((a)-[:${args("relation_type")}]-(:Entity:Role)-[:${args("relation_type")}]-(b))
                |DETACH DELETE h
              """.stripMargin
           )
@@ -472,7 +472,7 @@ trait BaseOperate {
                |WITH a, b
                |MATCH (a)-[:VIRTUAL]-(h:Entity:Role)-[:VIRTUAL]-(b)
                |WITH a, b, h
-               |WHERE NOT exists((a)-[:IS]-(:Entity:Role)-[:OF]-(b))
+               |WHERE NOT exists((a)-[:${args("relation_type")}]-(:Entity:Role)-[:${args("relation_type")}]-(b))
                |DETACH DELETE h
              """.stripMargin
           )
@@ -492,7 +492,7 @@ trait BaseOperate {
                |WITH a, b
                |MATCH (a)-[:VIRTUAL]-(h:Entity:Role)-[:VIRTUAL]-(b)
                |WITH a, b, h
-               |WHERE NOT exists((a)-[:IS]-(:Entity:Role)-[:OF]-(b))
+               |WHERE NOT exists((a)-[:${args("relation_type")}]-(:Entity:Role)-[:${args("relation_type")}]-(b))
                |DETACH DELETE h
              """.stripMargin
           )
