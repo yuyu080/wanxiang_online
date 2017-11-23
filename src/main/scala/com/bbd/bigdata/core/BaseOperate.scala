@@ -338,6 +338,7 @@ trait BaseOperate {
   }
 
   def operateRelationEdge(args: Map[String, String]): Tuple2[String, Array[String]] = {
+    val role_type = "INVEST|SUPERVISOR|DIRECTOR|LEGAL|EXECUTIVE|BRANCH"
     var step_one = ""
     var step_two = ""
     val step_three =
@@ -452,7 +453,7 @@ trait BaseOperate {
                |MATCH (a)-[:VIRTUAL]-(h:Entity:Role)-[:VIRTUAL]-(b)
                |SET h.relation_type = False
                |WITH a, b, h
-               |WHERE NOT exists((a)-[:${args("relation_type")}]-(:Entity:Role)-[:${args("relation_type")}]-(b))
+               |WHERE NOT exists((a)-[:$role_type]-(:Entity:Role)-[:$role_type]-(b))
                |DETACH DELETE h
              """.stripMargin
           )
@@ -472,7 +473,7 @@ trait BaseOperate {
                |WITH a, b
                |MATCH (a)-[:VIRTUAL]-(h:Entity:Role)-[:VIRTUAL]-(b)
                |WITH a, b, h
-               |WHERE NOT exists((a)-[:${args("relation_type")}]-(:Entity:Role)-[:${args("relation_type")}]-(b))
+               |WHERE NOT exists((a)-[:$role_type]-(:Entity:Role)-[:$role_type]-(b))
                |DETACH DELETE h
              """.stripMargin
           )
@@ -492,7 +493,7 @@ trait BaseOperate {
                |WITH a, b
                |MATCH (a)-[:VIRTUAL]-(h:Entity:Role)-[:VIRTUAL]-(b)
                |WITH a, b, h
-               |WHERE NOT exists((a)-[:${args("relation_type")}]-(:Entity:Role)-[:${args("relation_type")}]-(b))
+               |WHERE NOT exists((a)-[:$role_type]-(:Entity:Role)-[:$role_type]-(b))
                |DETACH DELETE h
              """.stripMargin
           )
