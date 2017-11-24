@@ -1,7 +1,6 @@
 package com.bbd.bigdata.core
 
 import java.util.Properties
-
 import com.bbd.bigdata.util.CommonFunctions
 
 import scala.util.Try
@@ -78,9 +77,8 @@ trait BaseOperate {
          """.stripMargin,
           s"""
              |MATCH (a:Entity:Company { bbd_qyxx_id: "$bbd_qyxx_id" })-[e2:BELONG]->(b:Entity:Industry)
-             |DELETE e2
-             |WITH b
              |SET b.company_num = b.company_num - 1
+             |DELETE e2
          """.stripMargin,
           s"""
              |MERGE (a:Entity:Company {bbd_qyxx_id: "$bbd_qyxx_id" })
@@ -193,7 +191,7 @@ trait BaseOperate {
         Array(
           s"""
              |MATCH (a:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })-[e1:BELONG]-(b:Entity:Time)
-             |SET b.company_num = b.company_num - 1
+             |SET b.event_num = b.event_num - 1
              |DELETE e1
              |WITH b
              |MATCH (b)-[e2:BELONG]->(e:Entity:Time)
@@ -389,6 +387,8 @@ trait BaseOperate {
         s"""
            |MERGE (c:Entity:Role:${CommonFunctions.upperCase(args("relation_type").toLowerCase)} {bbd_role_id: "${args("bbd_role_id")}" })
            |ON CREATE SET c.create_time = timestamp()
+           |ON CREATE SET a.dwtzxx = a.dwtzxx + 1
+           |ON CREATE SET b.gdxx = b.gdxx + 1
            |SET c.update_time = timestamp()
            |SET c.role_name = "${args("role_name")}"
            |SET c.ratio = "${args("ratio")}"
@@ -396,8 +396,6 @@ trait BaseOperate {
            |MERGE (d:Entity:Role:Isinvest {bbd_role_id: "${args("bbd_isinvest_role_id")}" })
            |ON CREATE SET d.create_time = timestamp()
            |SET d.relation_type = True
-           |SET a.dwtzxx = a.dwtzxx + 1
-           |SET b.gdxx = b.gdxx + 1
            |SET a.update_time = timestamp()
            |SET b.update_time = timestamp()
            |SET d.update_time = timestamp()
@@ -407,17 +405,17 @@ trait BaseOperate {
         s"""
            |MERGE (c:Entity:Role:${CommonFunctions.upperCase(args("relation_type").toLowerCase)} {bbd_role_id: "${args("bbd_role_id")}" })
            |ON CREATE SET c.create_time = timestamp()
+           |ON CREATE SET b.fzjg = b.fzjg + 1
            |SET c.update_time = timestamp()
            |SET c.role_name = "${args("role_name")}"
            |WITH a,b,c
            |MERGE (d:Entity:Role:Isinvest {bbd_role_id: "${args("bbd_isinvest_role_id")}" })
            |ON CREATE SET d.create_time = timestamp()
            |ON CREATE SET d.relation_type = False
-           |SET b.fzjg = b.fzjg + 1
            |SET b.update_time = timestamp()
            |SET d.update_time = timestamp()
            |WITH a, b, c, d """.stripMargin
-    } else {
+    } else if (args("relation_type") == "LEGAL") {
       step_two =
         s"""
            |MERGE (c:Entity:Role:${CommonFunctions.upperCase(args("relation_type").toLowerCase)} {bbd_role_id: "${args("bbd_role_id")}" })
@@ -428,7 +426,21 @@ trait BaseOperate {
            |MERGE (d:Entity:Role:Isinvest {bbd_role_id: "${args("bbd_isinvest_role_id")}" })
            |ON CREATE SET d.create_time = timestamp()
            |ON CREATE SET d.relation_type = False
-           |SET b.baxx = b.baxx + 1
+           |SET b.update_time = timestamp()
+           |SET d.update_time = timestamp()
+           |WITH a, b, c, d """.stripMargin
+    } else {
+      step_two =
+        s"""
+           |MERGE (c:Entity:Role:${CommonFunctions.upperCase(args("relation_type").toLowerCase)} {bbd_role_id: "${args("bbd_role_id")}" })
+           |ON CREATE SET c.create_time = timestamp()
+           |ON CREATE SET b.baxx = b.baxx + 1
+           |SET c.update_time = timestamp()
+           |SET c.role_name = "${args("role_name")}"
+           |WITH a,b,c
+           |MERGE (d:Entity:Role:Isinvest {bbd_role_id: "${args("bbd_isinvest_role_id")}" })
+           |ON CREATE SET d.create_time = timestamp()
+           |ON CREATE SET d.relation_type = False
            |SET b.update_time = timestamp()
            |SET d.update_time = timestamp()
            |WITH a, b, c, d """.stripMargin
@@ -468,6 +480,25 @@ trait BaseOperate {
                |(c:Entity:Role:${CommonFunctions.upperCase(args("relation_type").toLowerCase)} {bbd_role_id: "${args("bbd_role_id")}" }),
                |(b:Entity:Company {bbd_qyxx_id: "${args("destination_id")}" })
                |SET b.fzjg = b.fzjg - 1
+               |SET b.update_time = timestamp()
+               |DETACH DELETE c
+               |WITH a, b
+               |MATCH (a)-[:VIRTUAL]-(h:Entity:Role)-[:VIRTUAL]-(b)
+               |WITH a, b, h
+               |WHERE NOT exists((a)-[:$role_type]-(:Entity:Role)-[:$role_type]-(b))
+               |DETACH DELETE h
+             """.stripMargin
+          )
+        )
+      } else if (args("relation_type") == "LEGAL") {
+        (
+          args("table_name"),
+          Array(
+            s"""
+               |MATCH
+               |(a:Entity:Company {bbd_qyxx_id: "${args("source_id")}" }),
+               |(c:Entity:Role:${CommonFunctions.upperCase(args("relation_type").toLowerCase)} {bbd_role_id: "${args("bbd_role_id")}" }),
+               |(b:Entity:Company {bbd_qyxx_id: "${args("destination_id")}" })
                |SET b.update_time = timestamp()
                |DETACH DELETE c
                |WITH a, b
