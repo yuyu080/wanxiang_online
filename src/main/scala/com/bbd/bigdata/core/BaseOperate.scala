@@ -173,9 +173,9 @@ trait BaseOperate {
              |DELETE e1
              |WITH b
              |MATCH (e:Entity:Time {time : "$event_month" }), (f:Entity:Time {time : "$event_year" })
-             |SET b.company_num = b.company_num - 1
-             |SET e.company_num = e.company_num - 1
-             |SET f.company_num = f.company_num - 1
+             |SET b.event_num = b.event_num - 1
+             |SET e.event_num = e.event_num - 1
+             |SET f.event_num = f.event_num - 1
              |SET b.update_time = timestamp()
              |SET e.update_time = timestamp()
              |SET f.update_time = timestamp()
@@ -197,10 +197,10 @@ trait BaseOperate {
              |DELETE e1
              |WITH b
              |MATCH (b)-[e2:BELONG]->(e:Entity:Time)
-             |SET e.company_num = e.company_num - 1
+             |SET e.event_num = e.event_num - 1
              |WITH e
              |MATCH (e)-[e3:BELONG]->(f:Entity:Time)
-             |SET f.company_num = f.company_num - 1
+             |SET f.event_num = f.event_num - 1
          """.stripMargin,
           s"""
              |MERGE (a:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })
@@ -211,9 +211,9 @@ trait BaseOperate {
           s"""
              |MATCH (a:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" }), (b:Entity:Time {time : "$event_time" }), (e:Entity:Time {time : "$event_month" }), (f:Entity:Time {time : "$event_year" })
              |MERGE (a)-[e1:BELONG]-(b)
-             |ON CREATE SET b.company_num = b.company_num + 1
-             |ON CREATE SET e.company_num = e.company_num + 1
-             |ON CREATE SET f.company_num = f.company_num + 1
+             |ON CREATE SET b.event_num = b.event_num + 1
+             |ON CREATE SET e.event_num = e.event_num + 1
+             |ON CREATE SET f.event_num = f.event_num + 1
              |ON CREATE SET b.update_time = timestamp()
              |ON CREATE SET e.update_time = timestamp()
              |ON CREATE SET f.update_time = timestamp()
