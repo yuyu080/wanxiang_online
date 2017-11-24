@@ -7,26 +7,27 @@ import com.bbd.bigdata.util.CommonFunctions
   */
 object CompositeOperate extends BaseOperate {
 
-  def qyxxBasic(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
+  def qyxxBasic(info: com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
     //操作企业节点
     val company_node_operation: Tuple2[String, Array[String]] = operateCompanyNode(info)
 
     //操作角色节点、关系
     val source_id = info.get("frname_id").toString
+    val source_name = info.get("frname").toString
     val relation_type = "LEGAL"
     val destination_id = info.get("bbd_qyxx_id").toString
-    val bbd_role_id = CommonFunctions.md5(source_id + destination_id + relation_type)
-    val bbd_isinvest_role_id = CommonFunctions.md5(source_id + destination_id + "Isinvest")
+    val bbd_role_id = CommonFunctions.md5(source_name + destination_id + relation_type)
+    val bbd_isinvest_role_id = CommonFunctions.md5(source_name + destination_id + "Isinvest")
 
     val args = Map(
       "table_name" -> info.get("canal_table").toString.replace("_canal", ""),
       "event_type" -> info.get("canal_eventtype").toString,
       "source_label" -> {
         val name_compid = info.get("frname_compid").toString
-        if(name_compid == "0") "Company" else if(name_compid == "1") "Person" else ""
+        if (name_compid == "0") "Company" else if (name_compid == "1") "Person" else ""
       },
       "source_id" -> source_id,
-      "source_name" -> info.get("frname").toString,
+      "source_name" -> source_name,
       "relation_type" -> relation_type,
       "destination_id" -> destination_id,
       "bbd_role_id" -> bbd_role_id,
@@ -44,23 +45,24 @@ object CompositeOperate extends BaseOperate {
     operateEventEdge(info)
   }
 
-  def qyxxGdxx(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
+  def qyxxGdxx(info: com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
 
     val source_id = info.get("shareholder_id").toString
+    val source_name = info.get("shareholder_name").toString
     val relation_type = "INVEST"
     val destination_id = info.get("bbd_qyxx_id").toString
-    val bbd_role_id = CommonFunctions.md5(source_id + destination_id + relation_type)
-    val bbd_isinvest_role_id = CommonFunctions.md5(source_id + destination_id + "Isinvest")
+    val bbd_role_id = CommonFunctions.md5(source_name + destination_id + relation_type)
+    val bbd_isinvest_role_id = CommonFunctions.md5(source_name + destination_id + "Isinvest")
 
     val args = Map(
       "table_name" -> info.get("canal_table").toString.replace("_canal", ""),
       "event_type" -> info.get("canal_eventtype").toString,
       "source_label" -> {
         val name_compid = info.get("name_compid").toString
-        if(name_compid == "0") "Company" else if(name_compid == "1") "Person" else ""
+        if (name_compid == "0") "Company" else if (name_compid == "1") "Person" else ""
       },
       "source_id" -> source_id,
-      "source_name" -> info.get("shareholder_name").toString,
+      "source_name" -> source_name,
       "relation_type" -> relation_type,
       "destination_id" -> destination_id,
       "bbd_role_id" -> bbd_role_id,
@@ -72,19 +74,20 @@ object CompositeOperate extends BaseOperate {
     operateRelationEdge(args)
   }
 
-  def qyxxBaxx(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
+  def qyxxBaxx(info: com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
     val source_id = info.get("name_id").toString
+    val source_name = info.get("name").toString
     val relation_type = info.get("type").toString.toUpperCase
     val destination_id = info.get("bbd_qyxx_id").toString
-    val bbd_role_id = CommonFunctions.md5(source_id + destination_id + relation_type)
-    val bbd_isinvest_role_id = CommonFunctions.md5(source_id + destination_id + "Isinvest")
+    val bbd_role_id = CommonFunctions.md5(source_name + destination_id + relation_type)
+    val bbd_isinvest_role_id = CommonFunctions.md5(source_name + destination_id + "Isinvest")
 
-    val args  = Map(
+    val args = Map(
       "table_name" -> info.get("canal_table").toString.replace("_canal", ""),
       "event_type" -> info.get("canal_eventtype").toString,
       "source_label" -> "Person",
       "source_id" -> source_id,
-      "source_name" -> info.get("name").toString,
+      "source_name" -> source_name,
       "relation_type" -> relation_type,
       "destination_id" -> destination_id,
       "bbd_role_id" -> bbd_role_id,
@@ -95,19 +98,20 @@ object CompositeOperate extends BaseOperate {
     operateRelationEdge(args)
   }
 
-  def qyxxFzjgMerge(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
+  def qyxxFzjgMerge(info: com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
     val source_id = info.get("bbd_branch_id").toString
+    val source_name = info.get("name").toString
     val relation_type = "BRANCH"
     val destination_id = info.get("bbd_qyxx_id").toString
-    val bbd_role_id = CommonFunctions.md5(source_id + destination_id + relation_type)
-    val bbd_isinvest_role_id = CommonFunctions.md5(source_id + destination_id + "Isinvest")
+    val bbd_role_id = CommonFunctions.md5(source_name + destination_id + relation_type)
+    val bbd_isinvest_role_id = CommonFunctions.md5(source_name + destination_id + "Isinvest")
 
     val args = Map(
       "table_name" -> info.get("canal_table").toString.replace("_canal", ""),
       "event_type" -> info.get("canal_eventtype").toString,
       "source_label" -> "Company",
       "source_id" -> source_id,
-      "source_name" -> info.get("name").toString,
+      "source_name" -> source_name,
       "relation_type" -> relation_type,
       "destination_id" -> destination_id,
       "bbd_role_id" -> bbd_role_id,

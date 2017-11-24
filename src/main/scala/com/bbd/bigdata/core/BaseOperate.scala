@@ -262,9 +262,9 @@ trait BaseOperate {
             Array(
               s"""
                  |MATCH (a:Entity:Company {bbd_qyxx_id: "$bbd_qyxx_id" })-[e1:$relation_type]->(b:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })
-                 |DELETE e1
                  |SET a.update_time = timestamp()
                  |SET a.$company_property_name = a.$company_property_name - 1
+                 |DELETE e1
              """.stripMargin
             )
           )
@@ -444,11 +444,11 @@ trait BaseOperate {
                |(a:Entity:${args("source_label")} {bbd_qyxx_id: "${args("source_id")}" }),
                |(c:Entity:Role:${CommonFunctions.upperCase(args("relation_type").toLowerCase)} {bbd_role_id: "${args("bbd_role_id")}" }),
                |(b:Entity:Company {bbd_qyxx_id: "${args("destination_id")}" })
-               |DETACH DELETE c
                |SET a.dwtzxx = a.dwtzxx - 1
                |SET b.gdxx = b.gdxx - 1
                |SET b.update_time = timestamp()
                |SET a.update_time = timestamp()
+               |DETACH DELETE c
                |WITH a, b
                |MATCH (a)-[:VIRTUAL]-(h:Entity:Role)-[:VIRTUAL]-(b)
                |SET h.relation_type = False
@@ -467,9 +467,9 @@ trait BaseOperate {
                |(a:Entity:Company {bbd_qyxx_id: "${args("source_id")}" }),
                |(c:Entity:Role:${CommonFunctions.upperCase(args("relation_type").toLowerCase)} {bbd_role_id: "${args("bbd_role_id")}" }),
                |(b:Entity:Company {bbd_qyxx_id: "${args("destination_id")}" })
-               |DETACH DELETE c
                |SET b.fzjg = b.fzjg - 1
                |SET b.update_time = timestamp()
+               |DETACH DELETE c
                |WITH a, b
                |MATCH (a)-[:VIRTUAL]-(h:Entity:Role)-[:VIRTUAL]-(b)
                |WITH a, b, h
@@ -487,9 +487,9 @@ trait BaseOperate {
                |(a:Entity:${args("source_label")} {bbd_qyxx_id: "${args("source_id")}" }),
                |(c:Entity:Role:${CommonFunctions.upperCase(args("relation_type").toLowerCase)} {bbd_role_id: "${args("bbd_role_id")}" }),
                |(b:Entity:Company {bbd_qyxx_id: "${args("destination_id")}" })
-               |DETACH DELETE c
                |SET b.baxx = b.baxx - 1
                |SET b.update_time = timestamp()
+               |DETACH DELETE c
                |WITH a, b
                |MATCH (a)-[:VIRTUAL]-(h:Entity:Role)-[:VIRTUAL]-(b)
                |WITH a, b, h
