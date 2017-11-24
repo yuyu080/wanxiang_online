@@ -29,7 +29,7 @@ object WanxiangSinkToNeo4j {
         */
       //neo4j 连接信息
       //测试neo4j bolt://10.28.102.32:7687  正式 bolt://10.28.52.151:7690
-      val conn_addr = "bolt://10.28.102.32:7687"
+      val conn_addr = "bolt://10.28.52.151:7690"
       val user = "neo4j"
       val passwd = "fyW1KFSYNfxRtw1ivAJOrnV3AKkaQUfB"
       //加载驱动
@@ -45,15 +45,20 @@ object WanxiangSinkToNeo4j {
       //一个tuple接收数据，包含（table_name,List<cypher>）
       val tuple_cypher_message = CypherToNeo4j.getCypher(in)
       println(in)
-
-      tuple_cypher_message._2(0) match {
-        case "NO_PROCESSING_METHOD" =>
-        case "MESSAGE_ERROR" => put_kafka_topic(in)
-        case "SINK_TO_REDIS" => put_blacklist_redis(tuple_cypher_message._2(1))
-        case _ => driver.session().writeTransaction(new TransactionWork[Integer]() {
-          override def execute(tx: Transaction): Integer = createRelation(tx,tuple_cypher_message._2)
-        })
+      try{
+        tuple_cypher_message._2(0) match {
+          case "NO_PROCESSING_METHOD" =>
+          case "MESSAGE_ERROR" => put_kafka_topic(in)
+          case "SINK_TO_REDIS" => put_blacklist_redis(tuple_cypher_message._2(1))
+          case _ => driver.session().writeTransaction(new TransactionWork[Integer]() {
+            override def execute(tx: Transaction): Integer = createRelation(tx,tuple_cypher_message._2)
+          })
+        }
+      }catch {
+        case e: Exception =>
+          e.printStackTrace()
       }
+
     }
 
     def put_blacklist_redis(bbd_qyxx_id: String): Unit = {
