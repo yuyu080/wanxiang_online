@@ -262,6 +262,7 @@ trait BaseOperate {
                  |MATCH (a:Entity:Company {bbd_qyxx_id: "$bbd_qyxx_id" })-[e1:$relation_type]->(b:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })
                  |SET a.update_time = timestamp()
                  |SET a.$company_property_name = a.$company_property_name - 1
+                 |WITH e1
                  |DELETE e1
              """.stripMargin
             )
