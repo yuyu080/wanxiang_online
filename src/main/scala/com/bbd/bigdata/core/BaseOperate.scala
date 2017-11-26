@@ -339,11 +339,25 @@ trait BaseOperate {
   def operateRelationEdge(args: Map[String, String]): Tuple2[String, Array[String]] = {
     val role_type = "INVEST|SUPERVISOR|DIRECTOR|LEGAL|EXECUTIVE|BRANCH"
     var step_one = ""
-    var step_two = ""
-    val step_three =
+    var step_two =
+      s"""
+         |MERGE (c:Entity:Role:${CommonFunctions.upperCase(args("relation_type").toLowerCase)} {bbd_role_id: "${args("bbd_role_id")}" })
+         |ON CREATE SET c.create_time = timestamp()
+         |SET c.update_time = timestamp()
+         |SET c.role_name = "${args("role_name")}"
+         |WITH a,b,c
+         |MERGE (d:Entity:Role:Isinvest {bbd_role_id: "${args("bbd_isinvest_role_id")}" })
+         |ON CREATE SET d.create_time = timestamp()
+         |ON CREATE SET d.relation_type = False
+         |SET b.update_time = timestamp()
+         |SET d.update_time = timestamp()
+         |WITH a, b, c, d """.stripMargin
+    var step_three = ""
+
+    def get_step_three(str_one: String, str_two: String): String = {
       s"""
          |MERGE (a)-[e1:${args("relation_type")}]->(c)
-         |ON CREATE SET e1.create_time = timestamp()
+         |ON CREATE SET e1.create_time = timestamp() $str_one
          |WITH a, b, c, d
          |MERGE (a)-[e2:VIRTUAL]->(d)
          |ON CREATE SET e2.create_time = timestamp()
@@ -352,8 +366,26 @@ trait BaseOperate {
          |ON CREATE SET e3.create_time = timestamp()
          |WITH a, b, c, d
          |MERGE (d)-[e4:VIRTUAL]->(b)
-         |ON CREATE SET e4.create_time = timestamp()
+         |ON CREATE SET e4.create_time = timestamp() $str_two
          |return a, b, c, d """.stripMargin
+    }
+
+    def get_delete(str_one: String, str_two: String): String = {
+      s"""
+         |MATCH
+         |(a:Entity:${args("source_label")} {bbd_qyxx_id: "${args("source_id")}" }),
+         |(c:Entity:Role:${CommonFunctions.upperCase(args("relation_type").toLowerCase)} {bbd_role_id: "${args("bbd_role_id")}" }),
+         |(b:Entity:Company {bbd_qyxx_id: "${args("destination_id")}" })
+         |SET b.update_time = timestamp() $str_one
+         |DETACH DELETE c
+         |WITH a, b
+         |MATCH (a)-[:VIRTUAL]-(h:Entity:Role)-[:VIRTUAL]-(b) $str_two
+         |WITH a, b, h
+         |WHERE NOT exists((a)-[:$role_type]-(:Entity:Role)-[:$role_type]-(b))
+         |DETACH DELETE h
+       """.stripMargin
+    }
+
 
     if(args("source_label") == "Company") {
       step_one =
@@ -388,8 +420,6 @@ trait BaseOperate {
         s"""
            |MERGE (c:Entity:Role:${CommonFunctions.upperCase(args("relation_type").toLowerCase)} {bbd_role_id: "${args("bbd_role_id")}" })
            |ON CREATE SET c.create_time = timestamp()
-           |ON CREATE SET a.dwtzxx = a.dwtzxx + 1
-           |ON CREATE SET b.gdxx = b.gdxx + 1
            |SET c.update_time = timestamp()
            |SET c.role_name = "${args("role_name")}"
            |SET c.ratio = "${args("ratio")}"
@@ -401,50 +431,23 @@ trait BaseOperate {
            |SET b.update_time = timestamp()
            |SET d.update_time = timestamp()
            |WITH a, b, c, d """.stripMargin
+      step_three = get_step_three(
+        "ON CREATE SET a.dwtzxx = a.dwtzxx + 1",
+        "ON CREATE SET b.gdxx = b.gdxx + 1"
+      )
     } else if (args("relation_type") == "BRANCH") {
-      step_two =
-        s"""
-           |MERGE (c:Entity:Role:${CommonFunctions.upperCase(args("relation_type").toLowerCase)} {bbd_role_id: "${args("bbd_role_id")}" })
-           |ON CREATE SET c.create_time = timestamp()
-           |ON CREATE SET b.fzjg = b.fzjg + 1
-           |SET c.update_time = timestamp()
-           |SET c.role_name = "${args("role_name")}"
-           |WITH a,b,c
-           |MERGE (d:Entity:Role:Isinvest {bbd_role_id: "${args("bbd_isinvest_role_id")}" })
-           |ON CREATE SET d.create_time = timestamp()
-           |ON CREATE SET d.relation_type = False
-           |SET b.update_time = timestamp()
-           |SET d.update_time = timestamp()
-           |WITH a, b, c, d """.stripMargin
+      step_three = get_step_three(
+        "", "ON CREATE SET b.fzjg = b.fzjg + 1"
+      )
     } else if (args("relation_type") == "LEGAL") {
-      step_two =
-        s"""
-           |MERGE (c:Entity:Role:${CommonFunctions.upperCase(args("relation_type").toLowerCase)} {bbd_role_id: "${args("bbd_role_id")}" })
-           |ON CREATE SET c.create_time = timestamp()
-           |SET c.update_time = timestamp()
-           |SET c.role_name = "${args("role_name")}"
-           |WITH a,b,c
-           |MERGE (d:Entity:Role:Isinvest {bbd_role_id: "${args("bbd_isinvest_role_id")}" })
-           |ON CREATE SET d.create_time = timestamp()
-           |ON CREATE SET d.relation_type = False
-           |SET b.update_time = timestamp()
-           |SET d.update_time = timestamp()
-           |WITH a, b, c, d """.stripMargin
+      step_three = get_step_three(
+        "",
+        ""
+      )
     } else {
-      step_two =
-        s"""
-           |MERGE (c:Entity:Role:${CommonFunctions.upperCase(args("relation_type").toLowerCase)} {bbd_role_id: "${args("bbd_role_id")}" })
-           |ON CREATE SET c.create_time = timestamp()
-           |ON CREATE SET b.baxx = b.baxx + 1
-           |SET c.update_time = timestamp()
-           |SET c.role_name = "${args("role_name")}"
-           |WITH a,b,c
-           |MERGE (d:Entity:Role:Isinvest {bbd_role_id: "${args("bbd_isinvest_role_id")}" })
-           |ON CREATE SET d.create_time = timestamp()
-           |ON CREATE SET d.relation_type = False
-           |SET b.update_time = timestamp()
-           |SET d.update_time = timestamp()
-           |WITH a, b, c, d """.stripMargin
+      step_three = get_step_three(
+        "", "ON CREATE SET b.baxx = b.baxx + 1"
+      )
     }
 
     if(args("event_type") == "DELETE") {
@@ -452,82 +455,40 @@ trait BaseOperate {
         (
           args("table_name"),
           Array(
-            s"""
-               |MATCH
-               |(a:Entity:${args("source_label")} {bbd_qyxx_id: "${args("source_id")}" }),
-               |(c:Entity:Role:${CommonFunctions.upperCase(args("relation_type").toLowerCase)} {bbd_role_id: "${args("bbd_role_id")}" }),
-               |(b:Entity:Company {bbd_qyxx_id: "${args("destination_id")}" })
-               |SET a.dwtzxx = a.dwtzxx - 1
-               |SET b.gdxx = b.gdxx - 1
-               |SET b.update_time = timestamp()
-               |SET a.update_time = timestamp()
-               |DETACH DELETE c
-               |WITH a, b
-               |MATCH (a)-[:VIRTUAL]-(h:Entity:Role)-[:VIRTUAL]-(b)
-               |SET h.relation_type = False
-               |WITH a, b, h
-               |WHERE NOT exists((a)-[:$role_type]-(:Entity:Role)-[:$role_type]-(b))
-               |DETACH DELETE h
-             """.stripMargin
+            get_delete(
+              "SET a.dwtzxx = a.dwtzxx - 1 SET b.gdxx = b.gdxx - 1",
+              "SET h.relation_type = False"
+            )
           )
         )
       } else if (args("relation_type") == "BRANCH") {
         (
           args("table_name"),
           Array(
-            s"""
-               |MATCH
-               |(a:Entity:Company {bbd_qyxx_id: "${args("source_id")}" }),
-               |(c:Entity:Role:${CommonFunctions.upperCase(args("relation_type").toLowerCase)} {bbd_role_id: "${args("bbd_role_id")}" }),
-               |(b:Entity:Company {bbd_qyxx_id: "${args("destination_id")}" })
-               |SET b.fzjg = b.fzjg - 1
-               |SET b.update_time = timestamp()
-               |DETACH DELETE c
-               |WITH a, b
-               |MATCH (a)-[:VIRTUAL]-(h:Entity:Role)-[:VIRTUAL]-(b)
-               |WITH a, b, h
-               |WHERE NOT exists((a)-[:$role_type]-(:Entity:Role)-[:$role_type]-(b))
-               |DETACH DELETE h
-             """.stripMargin
+            get_delete(
+              "SET b.fzjg = b.fzjg - 1",
+              ""
+            )
           )
         )
       } else if (args("relation_type") == "LEGAL") {
         (
           args("table_name"),
           Array(
-            s"""
-               |MATCH
-               |(a:Entity:Company {bbd_qyxx_id: "${args("source_id")}" }),
-               |(c:Entity:Role:${CommonFunctions.upperCase(args("relation_type").toLowerCase)} {bbd_role_id: "${args("bbd_role_id")}" }),
-               |(b:Entity:Company {bbd_qyxx_id: "${args("destination_id")}" })
-               |SET b.update_time = timestamp()
-               |DETACH DELETE c
-               |WITH a, b
-               |MATCH (a)-[:VIRTUAL]-(h:Entity:Role)-[:VIRTUAL]-(b)
-               |WITH a, b, h
-               |WHERE NOT exists((a)-[:$role_type]-(:Entity:Role)-[:$role_type]-(b))
-               |DETACH DELETE h
-             """.stripMargin
+            get_delete(
+              "",
+              ""
+            )
           )
         )
       } else {
         (
           args("table_name"),
           Array(
-            s"""
-               |MATCH
-               |(a:Entity:${args("source_label")} {bbd_qyxx_id: "${args("source_id")}" }),
-               |(c:Entity:Role:${CommonFunctions.upperCase(args("relation_type").toLowerCase)} {bbd_role_id: "${args("bbd_role_id")}" }),
-               |(b:Entity:Company {bbd_qyxx_id: "${args("destination_id")}" })
-               |SET b.baxx = b.baxx - 1
-               |SET b.update_time = timestamp()
-               |DETACH DELETE c
-               |WITH a, b
-               |MATCH (a)-[:VIRTUAL]-(h:Entity:Role)-[:VIRTUAL]-(b)
-               |WITH a, b, h
-               |WHERE NOT exists((a)-[:$role_type]-(:Entity:Role)-[:$role_type]-(b))
-               |DETACH DELETE h
-             """.stripMargin
+            get_delete(
+              "SET b.baxx = b.baxx - 1",
+              ""
+            )
           )
         )
       }
