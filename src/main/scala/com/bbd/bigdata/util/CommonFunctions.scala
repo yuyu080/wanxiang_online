@@ -106,6 +106,13 @@ object CommonFunctions {
     )
   }
 
+  def getCompanyNodePropertyName(event_table_name:String): String = {
+    val event_properties = new Properties()
+    val in = this.getClass.getClassLoader.getResourceAsStream("event_to_company_property_map.properties")
+    event_properties.load(in)
+    event_properties.getProperty(event_table_name)
+  }
+
   def getCompanyProperty(alias_name: String): String = {
     //从配置文件中获取事件节点对应的企业节点属性值
     val event_to_company_property = {
