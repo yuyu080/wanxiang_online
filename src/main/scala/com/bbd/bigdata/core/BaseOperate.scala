@@ -160,9 +160,25 @@ trait BaseOperate {
     val event_month = CommonFunctions.getDateTimeMonth(event_time)
     val event_year = CommonFunctions.getDateTimeYear(event_time)
     val event_label = CommonFunctions.upperCase(table_name)
-
+    val company_property_name = CommonFunctions.getCompanyNodePropertyName(table_name)
 
     if (event_type == "DELETE") {
+
+      val change_company_property = {
+        if(company_property_name != "") {
+          s"""
+             |MATCH (a:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })-[:${table_name.toUpperCase}]-(b:Company)
+             |SET b.$company_property_name = b.$company_property_name - 1
+             |SET b.update_time = timestamp()
+           """.stripMargin
+        } else {
+          s"""
+             |MATCH (a:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })-[:${table_name.toUpperCase}]-(b:Company)
+             |RETURN a
+           """.stripMargin
+        }
+      }
+
       (
         table_name,
         Array(
@@ -178,13 +194,13 @@ trait BaseOperate {
              |SET e.update_time = timestamp()
              |SET f.update_time = timestamp()
            """.stripMargin,
+          change_company_property,
           s"""
              |MATCH (a:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })
              |DETACH DELETE a
            """.stripMargin
         )
       )
-
     } else if(event_type == "INSERT" | event_type == "UPDATE") {
       (
         table_name,
@@ -232,12 +248,7 @@ trait BaseOperate {
      *根据表（事件）名，获取其在企业节点中的属性名
      * 例如：qyxx_bgxx这张表对应了企业节点的bgxx属性
      */
-    def getCompanyNodePropertyName(event_table_name:String): String = {
-      val event_properties = new Properties()
-      val in = this.getClass.getClassLoader.getResourceAsStream("event_to_company_property_map.properties")
-      event_properties.load(in)
-      event_properties.getProperty(event_table_name)
-    }
+
 
     val table_name = info.get("canal_table").toString.replace("_canal", "")
     val event_type = info.get("canal_eventtype").toString
@@ -246,7 +257,7 @@ trait BaseOperate {
     val bbd_qyxx_id = info.get("bbd_qyxx_id").toString
     val event_label = CommonFunctions.upperCase(event_table_name)
     val relation_type = event_table_name.toUpperCase
-    val company_property_name = getCompanyNodePropertyName(event_table_name)
+    val company_property_name = CommonFunctions.getCompanyNodePropertyName(event_table_name)
 
     /*
     * 1、首先判断该事件是否位于属性图中
