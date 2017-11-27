@@ -456,6 +456,10 @@ object CompositeOperate extends BaseOperate {
     operateEventNode(info)
   }
 
+  def qyxgDebet(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
+    operateEventNode(info)
+  }
+
   def qyxxNbJbxx(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
     operateEventNode(info)
   }

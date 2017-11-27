@@ -61,6 +61,7 @@ object CypherToNeo4j {
         case "qyxx_mordetail_canal" => qyxxMordetail(obj)
         case "domain_name_website_info_canal" => domainNameWebsiteInfo(obj)
         case "overseas_investment_canal" => overseasInvestment(obj)
+        case "qyxg_debet_canal" => qyxgDebet(obj)
         case "qyxx_nb_jbxx_canal" => qyxxNbJbxx(obj)
 
         case "qyxx_nb_gzsm_canal" => qyxxNbGzsm(obj)
