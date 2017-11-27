@@ -374,10 +374,10 @@ trait BaseOperate {
          |ON CREATE SET e2.create_time = timestamp()
          |WITH a, b, c, d
          |MERGE (c)-[e3:${args("relation_type")}]->(b)
-         |ON CREATE SET e3.create_time = timestamp()
+         |ON CREATE SET e3.create_time = timestamp() $str_two
          |WITH a, b, c, d
          |MERGE (d)-[e4:VIRTUAL]->(b)
-         |ON CREATE SET e4.create_time = timestamp() $str_two
+         |ON CREATE SET e4.create_time = timestamp()
          |return a, b, c, d """.stripMargin
     }
 
