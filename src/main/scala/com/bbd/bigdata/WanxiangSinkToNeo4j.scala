@@ -102,7 +102,7 @@ object WanxiangSinkToNeo4j {
       try{
         cypher_list.foreach(tx.run)
       }catch {
-        case ServiceUnavailableException => close()
+        //case e: ServiceUnavailableException => close()
         case e: Exception => e.printStackTrace();0
       }
       1
