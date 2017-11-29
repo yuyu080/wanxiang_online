@@ -29,10 +29,11 @@ object WanxiangSinkToNeo4j {
         * open方法是初始化方法，会在invoke方法之前执行，执行一次。
         */
       //neo4j 连接信息
-      //测试neo4j bolt://10.28.102.32:7687  正式 bolt://10.28.52.151:7690
-      val conn_addr = "bolt://10.28.102.32:7687"
-      val user = "neo4j"
-      val passwd = "fyW1KFSYNfxRtw1ivAJOrnV3AKkaQUfB"
+      //测试neo4j bolt://10.28.102.32:7687  正式 bolt://10.28.52.151:7690 neo4j fyW1KFSYNfxRtw1ivAJOrnV3AKkaQUfB
+      //正式 10.28.62.48 wanxiangstream 2a3b73d7145adbf899536702ecc71855
+      val conn_addr = "bolt://10.28.62.48:7687"
+      val user = "wanxiangstream"
+      val passwd = "2a3b73d7145adbf899536702ecc71855"
       //加载驱动
       driver = GraphDatabase.driver(conn_addr, AuthTokens.basic(user, passwd),Config.build().withMaxTransactionRetryTime( 15, SECONDS ).toConfig())
     }
