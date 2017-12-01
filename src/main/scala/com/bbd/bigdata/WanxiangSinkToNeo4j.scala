@@ -47,14 +47,23 @@ object WanxiangSinkToNeo4j {
       //一个tuple接收数据，包含（table_name,List<cypher>）
       val tuple_cypher_message = CypherToNeo4j.getCypher(in)
       println(in)
-      tuple_cypher_message._2(0) match {
-        case "NO_PROCESSING_METHOD" =>
-        case "MESSAGE_ERROR" => put_kafka_topic(in)
-        case "SINK_TO_REDIS" => put_blacklist_redis(tuple_cypher_message._2(1))
-        case _ => driver.session().writeTransaction(new TransactionWork[Integer]() {
-          override def execute(tx: Transaction): Integer = createRelation(tx,tuple_cypher_message._2)
-        })
+      try{
+        tuple_cypher_message._2(0) match {
+          case "NO_PROCESSING_METHOD" =>
+          case "MESSAGE_ERROR" => put_kafka_topic(in)
+          case "SINK_TO_REDIS" => put_blacklist_redis(tuple_cypher_message._2(1))
+          case _ => driver.session().writeTransaction(new TransactionWork[Integer]() {
+            override def execute(tx: Transaction): Integer = createRelation(tx,tuple_cypher_message._2)
+          })
+        }
+
+      }catch {
+        case e: ServiceUnavailableException => e.printStackTrace();close()
+        case e: Exception =>
+          e.printStackTrace()
       }
+
+
 
     }
 
@@ -82,7 +91,9 @@ object WanxiangSinkToNeo4j {
       try {
         //读取配置文件，加载配置信息
         val props = new Properties()
-        props.load(ClassLoader.getSystemResourceAsStream("kafka-producer.properties"))
+        props.put("bootstrap.servers", "10.28.40.11:9092,10.28.40.12:9092,10.28.40.13:9092,10.28.40.14:9092,10.28.40.15:9092")
+        props.put("request.required.acks", "1")
+        props.put("message.send.max.retries", "20")
         val config = new ProducerConfig(props)
         val producer = new Producer[String, String](config)
         //put message to kafka topic
@@ -90,7 +101,7 @@ object WanxiangSinkToNeo4j {
         producer.send(keyedMessage)
       } catch {
         case e: Exception =>
-          e.printStackTrace()
+          println("kafka error!"); e.printStackTrace()
       }
     }
 
@@ -102,7 +113,6 @@ object WanxiangSinkToNeo4j {
       try{
         cypher_list.foreach(tx.run)
       }catch {
-        case e: ServiceUnavailableException => close()
         case e: Exception => e.printStackTrace();0
       }
       1
