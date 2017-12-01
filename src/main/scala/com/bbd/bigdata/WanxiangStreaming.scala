@@ -44,8 +44,7 @@ object WanxiangStreaming {
     //添加source
     val streamingMessages = env.addSource(
       //wanxiang_canal_20170919
-      new FlinkKafkaConsumer010[String]("wanxiang_canal_20170919", new SimpleStringSchema(), kafkaProps)).uid("wanxiang_source")
-      .addSink(new WanxiangSinkToNeo4j()).uid("wanxiang_sink")
+      new FlinkKafkaConsumer010[String]("wanxiang_canal_20170919", new SimpleStringSchema(), kafkaProps)).addSink(new WanxiangSinkToNeo4j())
 
     //streamingMessages.print()
     env.execute("Wanxiang streaming data processing")
