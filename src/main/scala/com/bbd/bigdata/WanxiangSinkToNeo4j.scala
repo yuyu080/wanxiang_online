@@ -31,7 +31,7 @@ object WanxiangSinkToNeo4j {
       //neo4j 连接信息
       //测试neo4j bolt://10.28.102.32:7687  正式 bolt://10.28.52.151:7690 neo4j fyW1KFSYNfxRtw1ivAJOrnV3AKkaQUfB
       //正式 10.28.62.48 wanxiangstream 2a3b73d7145adbf899536702ecc71855
-      val conn_addr = "bolt://10.28.102.32:7687"
+      val conn_addr = "bolt://10.28.102.34:7687"
       val user = "neo4j"
       val passwd = "fyW1KFSYNfxRtw1ivAJOrnV3AKkaQUfB"
       //加载驱动
