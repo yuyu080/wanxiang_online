@@ -20,7 +20,6 @@ object WanxiangSinkToNeo4j {
   * 自定义flink sink ，结合我们的使用场景，实现richsinkfunction
   * 主要重写三个方法open(),invoke(),close()
   * */
-
   class WanxiangSinkToNeo4j extends RichSinkFunction[String]{
     private var driver : Driver = null
 
@@ -35,11 +34,7 @@ object WanxiangSinkToNeo4j {
       val user = "neo4j"
       val passwd = "fyW1KFSYNfxRtw1ivAJOrnV3AKkaQUfB"
       //加载驱动
-      try{
-        driver = GraphDatabase.driver(conn_addr, AuthTokens.basic(user, passwd),Config.build().withMaxTransactionRetryTime( 15, SECONDS ).toConfig())
-      }catch {
-        case e: ServiceUnavailableException => e.printStackTrace();
-      }
+      driver = GraphDatabase.driver(conn_addr, AuthTokens.basic(user, passwd),Config.build().withMaxTransactionRetryTime( 15, SECONDS ).toConfig())
 
     }
 
@@ -51,7 +46,8 @@ object WanxiangSinkToNeo4j {
         */
       //一个tuple接收数据，包含（table_name,List<cypher>）
       val tuple_cypher_message = CypherToNeo4j.getCypher(in)
-      println(in)
+
+
       try{
         tuple_cypher_message._2(0) match {
           case "NO_PROCESSING_METHOD" =>
@@ -63,10 +59,12 @@ object WanxiangSinkToNeo4j {
         }
 
       }catch {
-        case e: ServiceUnavailableException => e.printStackTrace();
-        case e: Exception =>
-          e.printStackTrace()
+        case e: Exception => e.printStackTrace()
       }
+      if(driver==null){
+        throw new ServiceUnavailableException("Neo4j is not ready!")
+      }
+
 
     }
 
@@ -80,7 +78,7 @@ object WanxiangSinkToNeo4j {
         RedisUtil.getJedis.sadd("wx_graph_black_set",bbd_qyxx_id)
       }catch {
         case e: Exception =>
-          e.printStackTrace()
+          println("redis error!");e.printStackTrace()
       }
 
     }
@@ -116,7 +114,8 @@ object WanxiangSinkToNeo4j {
       try{
         cypher_list.foreach(tx.run)
       }catch {
-        case e: Exception => e.printStackTrace();0
+        case e: ServiceUnavailableException => e.printStackTrace();close()
+        case e: Exception => println("Cypher execution errot!");e.printStackTrace();0
       }
       1
     }
