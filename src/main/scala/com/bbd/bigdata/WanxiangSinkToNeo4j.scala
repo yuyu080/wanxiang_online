@@ -35,7 +35,12 @@ object WanxiangSinkToNeo4j {
       val user = "neo4j"
       val passwd = "fyW1KFSYNfxRtw1ivAJOrnV3AKkaQUfB"
       //加载驱动
-      driver = GraphDatabase.driver(conn_addr, AuthTokens.basic(user, passwd),Config.build().withMaxTransactionRetryTime( 15, SECONDS ).toConfig())
+      try{
+        driver = GraphDatabase.driver(conn_addr, AuthTokens.basic(user, passwd),Config.build().withMaxTransactionRetryTime( 15, SECONDS ).toConfig())
+      }catch {
+        case e: ServiceUnavailableException => e.printStackTrace();
+      }
+
     }
 
     override def invoke(in: String): Unit = {
@@ -58,12 +63,10 @@ object WanxiangSinkToNeo4j {
         }
 
       }catch {
-        case e: ServiceUnavailableException => e.printStackTrace();close()
+        case e: ServiceUnavailableException => e.printStackTrace();
         case e: Exception =>
           e.printStackTrace()
       }
-
-
 
     }
 
