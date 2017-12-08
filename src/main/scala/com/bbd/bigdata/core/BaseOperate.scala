@@ -390,9 +390,9 @@ trait BaseOperate {
          |SET b.update_time = timestamp() $str_one
          |DETACH DELETE c
          |WITH a, b
-         |MATCH (a)-[:VIRTUAL]-(h:Entity:Role)-[:VIRTUAL]-(b) $str_two
+         |MATCH (a)-[:VIRTUAL]->(h:Entity:Role)-[:VIRTUAL]->(b) $str_two
          |WITH a, b, h
-         |WHERE NOT exists((a)-[:$role_type]-(:Entity:Role)-[:$role_type]-(b))
+         |WHERE NOT exists((a)-[:$role_type]->(:Entity:Role)-[:$role_type]->(b))
          |DETACH DELETE h
        """.stripMargin
     }
