@@ -13,29 +13,34 @@ import kafka.producer.ProducerConfig
 import kafka.producer.Producer
 import kafka.producer.KeyedMessage
 import com.bbd.bigdata.redis.RedisUtil
+import org.neo4j.driver.v1.exceptions.ServiceUnavailableException
 
 object WanxiangSinkToNeo4j {
   /*
   * 自定义flink sink ，结合我们的使用场景，实现richsinkfunction
   * 主要重写三个方法open(),invoke(),close()
   * */
-
+  @throws (classOf[Exception])
   class WanxiangSinkToNeo4j extends RichSinkFunction[String]{
     private var driver : Driver = null
 
+    @throws (classOf[Exception])
     override def open(parameters: Configuration): Unit = {
       /**
         * open方法是初始化方法，会在invoke方法之前执行，执行一次。
         */
       //neo4j 连接信息
-      //测试neo4j bolt://10.28.102.32:7687  正式 bolt://10.28.52.151:7690
-      val conn_addr = "bolt://10.28.52.151:7690"
-      val user = "neo4j"
-      val passwd = "fyW1KFSYNfxRtw1ivAJOrnV3AKkaQUfB"
+      //测试neo4j bolt://10.28.102.32:7687  正式 bolt://10.28.52.151:7690 neo4j fyW1KFSYNfxRtw1ivAJOrnV3AKkaQUfB
+      //正式 10.28.62.48 wanxiangstream 2a3b73d7145adbf899536702ecc71855
+      val conn_addr = "bolt://10.28.62.48:7687"
+      val user = "wanxiangstream"
+      val passwd = "2a3b73d7145adbf899536702ecc71855"
       //加载驱动
       driver = GraphDatabase.driver(conn_addr, AuthTokens.basic(user, passwd),Config.build().withMaxTransactionRetryTime( 15, SECONDS ).toConfig())
+
     }
 
+    @throws (classOf[Exception])
     override def invoke(in: String): Unit = {
       /**
         * invoke()方法通过json信息，获取相应cypher，并插入到数据库中。
@@ -44,7 +49,8 @@ object WanxiangSinkToNeo4j {
         */
       //一个tuple接收数据，包含（table_name,List<cypher>）
       val tuple_cypher_message = CypherToNeo4j.getCypher(in)
-      println(in)
+
+
       try{
         tuple_cypher_message._2(0) match {
           case "NO_PROCESSING_METHOD" =>
@@ -54,9 +60,9 @@ object WanxiangSinkToNeo4j {
             override def execute(tx: Transaction): Integer = createRelation(tx,tuple_cypher_message._2)
           })
         }
+
       }catch {
-        case e: Exception =>
-          e.printStackTrace()
+        case e: Exception => e.printStackTrace();put_kafka_topic(in)
       }
 
     }
@@ -71,7 +77,7 @@ object WanxiangSinkToNeo4j {
         RedisUtil.getJedis.sadd("wx_graph_black_set",bbd_qyxx_id)
       }catch {
         case e: Exception =>
-          e.printStackTrace()
+          println("redis error!");e.printStackTrace()
       }
 
     }
@@ -85,7 +91,9 @@ object WanxiangSinkToNeo4j {
       try {
         //读取配置文件，加载配置信息
         val props = new Properties()
-        props.load(ClassLoader.getSystemResourceAsStream("kafka-producer.properties"))
+        props.put("bootstrap.servers", "10.28.40.11:9092,10.28.40.12:9092,10.28.40.13:9092,10.28.40.14:9092,10.28.40.15:9092")
+        props.put("request.required.acks", "1")
+        props.put("message.send.max.retries", "20")
         val config = new ProducerConfig(props)
         val producer = new Producer[String, String](config)
         //put message to kafka topic
@@ -93,7 +101,7 @@ object WanxiangSinkToNeo4j {
         producer.send(keyedMessage)
       } catch {
         case e: Exception =>
-          e.printStackTrace()
+          println("kafka error!"); e.printStackTrace()
       }
     }
 
@@ -105,7 +113,8 @@ object WanxiangSinkToNeo4j {
       try{
         cypher_list.foreach(tx.run)
       }catch {
-        case e: Exception => e.printStackTrace();0
+        case e: ServiceUnavailableException => e.printStackTrace();close()
+        case e: Exception => println("Cypher execution errot!");e.printStackTrace();0
       }
       1
     }

@@ -12,9 +12,10 @@ object CypherToNeo4j {
    *输入一个json字符串，输出一个包含多个Cypther的元组
    */
   def getCypher(arg: String): Tuple2[String, Array[String]] = {
-    val obj = CommonFunctions.jsonToObj(arg)
-    val table_name = obj.get("canal_table").toString
+    var table_name = ""
     try {
+      val obj = CommonFunctions.jsonToObj(arg)
+      var table_name = obj.get("canal_table").toString
       table_name match {
         case "qyxx_basic_canal" => qyxxBasic(obj)
         case "qyxx_state_owned_enterprise_background_canal" => qyxxStateOwnedEnterpriseBackground(obj)
@@ -60,6 +61,7 @@ object CypherToNeo4j {
         case "qyxx_mordetail_canal" => qyxxMordetail(obj)
         case "domain_name_website_info_canal" => domainNameWebsiteInfo(obj)
         case "overseas_investment_canal" => overseasInvestment(obj)
+        case "qyxg_debet_canal" => qyxgDebet(obj)
         case "qyxx_nb_jbxx_canal" => qyxxNbJbxx(obj)
 
         case "qyxx_nb_gzsm_canal" => qyxxNbGzsm(obj)

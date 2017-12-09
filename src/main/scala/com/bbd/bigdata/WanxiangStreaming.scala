@@ -24,30 +24,31 @@ object WanxiangStreaming {
     env.enableCheckpointing(1000)
     env.getCheckpointConfig.setMaxConcurrentCheckpoints(1)
     env.setRestartStrategy(RestartStrategies.fixedDelayRestart(3,Time.of(10,TimeUnit.SECONDS)))
-    //env.setRestartStrategy(RestartStrategies.fixedDelayRestart(3,Time.of(10,TimeUnit.SECONDS)))
     //flink exactly_once
     env.getCheckpointConfig.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE)
 
     //定义kafka 配置,KAFKA_BROKER和消费组
     val KAFKA_BROKER = "10.28.40.11:9092,10.28.40.12:9092,10.28.40.13:9092,10.28.40.14:9092,10.28.40.15:9092"
     //val KAFKA_BROKER = "10.28.200.107:9092,10.28.200.108:9092,10.28.200.109:9092"
-    val TRANSACTION_GROUP = "bbd_wanxiang_20171020"
+    val TRANSACTION_GROUP = "bbd_wanxiang_online_20171206"
 
     //初始化kafka topic
     val kafkaProps = new Properties()
     //kafkaProps.load(ClassLoader.getSystemResourceAsStream("consumer.properties"))
     kafkaProps.setProperty("bootstrap.servers", KAFKA_BROKER)
     kafkaProps.setProperty("group.id", TRANSACTION_GROUP)
-    //kafkaProps.setProperty("auto.offset.reset", "earliest")
+    kafkaProps.setProperty("auto.offset.reset", "latest")
     kafkaProps.setProperty("fetch.message.max.bytes", "104857600")
 
     //添加source
     val streamingMessages = env.addSource(
       //wanxiang_canal_20170919
-      new FlinkKafkaConsumer010[String]("wanxiang_canal_20170919", new SimpleStringSchema(), kafkaProps)).addSink(new WanxiangSinkToNeo4j())
+      new FlinkKafkaConsumer010[String]("wanxiang_canal_20170919", new SimpleStringSchema(), kafkaProps)).uid("wanxiang_source").addSink(new WanxiangSinkToNeo4j()).uid("wanxiang_sink")
 
     //streamingMessages.print()
+
     env.execute("Wanxiang streaming data processing")
+
   }
 
 }
