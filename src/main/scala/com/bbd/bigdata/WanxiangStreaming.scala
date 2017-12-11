@@ -23,7 +23,7 @@ object WanxiangStreaming {
     val env = StreamExecutionEnvironment.getExecutionEnvironment
     env.enableCheckpointing(1000)
     env.getCheckpointConfig.setMaxConcurrentCheckpoints(1)
-    env.setRestartStrategy(RestartStrategies.fixedDelayRestart(3,Time.of(10,TimeUnit.SECONDS)))
+    env.setRestartStrategy(RestartStrategies.fixedDelayRestart(0,Time.of(10,TimeUnit.SECONDS)))
     //flink exactly_once
     env.getCheckpointConfig.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE)
 
