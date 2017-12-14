@@ -75,7 +75,7 @@ object CypherToNeo4j {
         case "qyxx_nb_xzxk_canal" => qyxxNbXzxk(obj)
         case "qyxx_nb_bgxx_canal" => qyxxNbBgxx(obj)
         case "black_list_canal" => blackList(obj)
-        case _ => (table_name, Array("NO_PROCESSING_METHOD"))
+        case _ => (table_name, Array("MESSAGE_ERROR"))
       }
     } catch {
       case ex: Exception => (table_name, Array("MESSAGE_ERROR"))

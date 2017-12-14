@@ -8,13 +8,13 @@ import redis.clients.jedis.JedisPoolConfig;
 public final class RedisUtil {
 
     //Redis服务器IP 测试：10.28.100.26:26379  bbdredis 正式://10.28.60.17:26379 GcE3W5Le84aKbWgKe2A8
-    private static String ADDR = "10.28.100.26";
+    private static String ADDR = "10.28.60.17";
 
     //Redis的端口号
     private static int PORT = 26379;
 
     //访问密码
-    private static String AUTH = "bbdredis";
+    private static String AUTH = "GcE3W5Le84aKbWgKe2A8";
 
     //可用连接实例的最大数目，默认值为8；
     //如果赋值为-1，则表示不限制；如果pool已经分配了maxActive个jedis实例，则此时pool的状态为exhausted(耗尽)。
