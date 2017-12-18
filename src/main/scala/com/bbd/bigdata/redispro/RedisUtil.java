@@ -1,4 +1,4 @@
-package com.bbd.bigdata.redis;
+package com.bbd.bigdata.redispro;
 
 
 import redis.clients.jedis.Jedis;

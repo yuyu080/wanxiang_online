@@ -4,7 +4,7 @@ import java.util.Properties
 import com.bbd.bigdata.util.CommonFunctions
 
 import scala.util.Try
-
+import scala.util.Random
 
 /**
   * Created by Administrator on 2017/10/11.
@@ -156,7 +156,7 @@ trait BaseOperate {
     val event_time = CommonFunctions.toStandardDateTime {
       val result = info.get(event_time_column)
       if (result == null) "" else result.toString
-    }.toString
+    }.toString + "-" + Random.nextInt(81000).toString
     val event_month = CommonFunctions.getDateTimeMonth(event_time)
     val event_year = CommonFunctions.getDateTimeYear(event_time)
     val event_label = CommonFunctions.upperCase(table_name)
@@ -185,14 +185,6 @@ trait BaseOperate {
           s"""
              |MATCH (a:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })-[e1:BELONG]-(b:Entity:Time {time : "$event_time"})
              |DELETE e1
-             |WITH b
-             |MATCH (e:Entity:Time {time : "$event_month" }), (f:Entity:Time {time : "$event_year" })
-             |SET b.event_num = b.event_num - 1
-             |SET e.event_num = e.event_num - 1
-             |SET f.event_num = f.event_num - 1
-             |SET b.update_time = timestamp()
-             |SET e.update_time = timestamp()
-             |SET f.update_time = timestamp()
            """.stripMargin,
           change_company_property,
           s"""
@@ -206,31 +198,15 @@ trait BaseOperate {
         table_name,
         Array(
           s"""
-             |MATCH (a:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })-[e1:BELONG]-(b:Entity:Time)
-             |SET b.event_num = b.event_num - 1
-             |DELETE e1
-             |WITH b
-             |MATCH (b)-[e2:BELONG]->(e:Entity:Time)
-             |SET e.event_num = e.event_num - 1
-             |WITH e
-             |MATCH (e)-[e3:BELONG]->(f:Entity:Time)
-             |SET f.event_num = f.event_num - 1
-         """.stripMargin,
-          s"""
              |MERGE (a:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })
              |ON CREATE SET a.create_time = timestamp()
              |SET a.event_time = $event_timestamp  $event_info
              |SET a.update_time = timestamp()
          """.stripMargin,
           s"""
-             |MATCH (a:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" }), (b:Entity:Time {time : "$event_time" }), (e:Entity:Time {time : "$event_month" }), (f:Entity:Time {time : "$event_year" })
+             |MATCH (a:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })
+             |MERGE (b:Entity:Time {time : "$event_time" })
              |MERGE (a)-[e1:BELONG]-(b)
-             |ON CREATE SET b.event_num = b.event_num + 1
-             |ON CREATE SET e.event_num = e.event_num + 1
-             |ON CREATE SET f.event_num = f.event_num + 1
-             |ON CREATE SET b.update_time = timestamp()
-             |ON CREATE SET e.update_time = timestamp()
-             |ON CREATE SET f.update_time = timestamp()
          """.stripMargin
         )
       )

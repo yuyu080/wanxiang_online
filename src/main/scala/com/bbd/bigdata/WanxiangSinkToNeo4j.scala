@@ -1,18 +1,21 @@
 package com.bbd.bigdata
 
+import java.util.concurrent.TimeUnit
+
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction
 import org.neo4j.driver.v1._
 import org.neo4j.driver.v1.Config
-import java.util.concurrent.TimeUnit._
-
 import com.bbd.bigdata.core.CypherToNeo4j
 import java.util.{Date, Properties}
 
 import kafka.producer.ProducerConfig
 import kafka.producer.Producer
 import kafka.producer.KeyedMessage
-import com.bbd.bigdata.redis.RedisUtil
+import com.bbd.bigdata.redispro.RedisUtil
+import org.neo4j.driver.v1.exceptions.{ClientException, DatabaseException, TransientException}
+
+import scala.util.Random
 
 
 object WanxiangSinkToNeo4j {
@@ -21,42 +24,27 @@ object WanxiangSinkToNeo4j {
   * 自定义flink sink ，结合我们的使用场景，实现richsinkfunction
   * 主要重写三个方法open(),invoke(),close()
   * */
-  @throws(classOf[Exception])
   class WanxiangSinkToNeo4j extends RichSinkFunction[String] {
     private var driver: Driver = null
+    //private var jr: redis.clients.jedis.Jedis =null
 
-    @throws(classOf[Exception])
     override def open(parameters: Configuration): Unit = {
       /**
         * open方法是初始化方法，会在invoke方法之前执行，执行一次。
         */
       //neo4j 连接信息
       //测试neo4j bolt://10.28.102.33:7687  正式 bolt://10.28.52.151:7690 neo4j fyW1KFSYNfxRtw1ivAJOrnV3AKkaQUfB
-      //正式 10.28.62.48 wanxiangstream 2a3b73d7145adbf899536702ecc71855
-      val conn_addr = "bolt://10.28.62.48:7687"
+      //正式 bolt://10.28.62.48:7687 wanxiangstream 2a3b73d7145adbf899536702ecc71855
+      val conn_addr = "bolt://10.28.62.50:7687"
       val user = "wanxiangstream"
       val passwd = "2a3b73d7145adbf899536702ecc71855"
       //加载驱动
 
-      driver = GraphDatabase.driver(conn_addr, AuthTokens.basic(user, passwd), Config.build().withEncryptionLevel(Config.EncryptionLevel.NONE).toConfig())
-
+      driver = GraphDatabase.driver(conn_addr, AuthTokens.basic(user, passwd), Config.build().withMaxTransactionRetryTime( 15,TimeUnit.SECONDS ).withEncryptionLevel(Config.EncryptionLevel.NONE).toConfig())
+      //jr = new redis.clients.jedis.Jedis("10.28.60.17", 26379)
+      //jr.auth("GcE3W5Le84aKbWgKe2A8");
     }
 
-    /*override def invoke(value: Array[String]): Unit = {
-      val session = driver.session()
-      try {
-        session.writeTransaction(new TransactionWork[Unit]() {
-          override def execute(tx: Transaction): Unit = value.foreach(tx.run)    //createRelation(tx, value)
-        })
-      } catch {
-        case e: Exception => e.printStackTrace()
-      }finally {
-        session.close()
-      }
-      session.close()
-    }*/
-
-    @throws (classOf[Exception])
     override def invoke(in: String): Unit = {
       /**
         * invoke()方法通过json信息，获取相应cypher，并插入到数据库中。
@@ -65,20 +53,30 @@ object WanxiangSinkToNeo4j {
         */
       //一个tuple接收数据，包含（table_name,List<cypher>）
       //println(in)
+      //put_kafka_topic(in)
       val session = driver.session()
       val tuple_cypher_message = CypherToNeo4j.getCypher(in)
+
       try{
         tuple_cypher_message._2(0) match {
-          case "MESSAGE_ERROR" => put_kafka_topic(in)
-          case "SINK_TO_REDIS" => put_blacklist_redis(tuple_cypher_message._2(1))
+          case "MESSAGE_ERROR" => //put_kafka_topic(in)
+          case "SINK_TO_REDIS" => //put_blacklist_redis(tuple_cypher_message._2(1))
           case _ => session.writeTransaction(new TransactionWork[Unit]() {
             override def execute(tx: Transaction): Unit = tuple_cypher_message._2.foreach(tx.run)
           })
         }
       }catch {
-        case e: Exception => e.printStackTrace()
+        case e: TransientException => //Thread.sleep(new Random().nextInt(100))
+        case e: ClientException => put_kafka_topic(in)
+        case e: DatabaseException =>
+
+        //case e: Exception => e.printStackTrace()
       }
+
       session.close()
+
+      //jr.sadd("wanxiang_test", (t4.getTime-t3.getTime)+" "+new Date())
+
     }
 
     def put_blacklist_redis(bbd_qyxx_id: String): Unit = {
