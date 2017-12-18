@@ -65,22 +65,6 @@ trait BaseOperate {
         table_name,
         Array(
           s"""
-             |MATCH (a:Entity:Company { bbd_qyxx_id: "$bbd_qyxx_id" })-[e1:BELONG]->(b:Entity:Region)
-             |SET b.company_num = b.company_num - 1
-             |DELETE e1
-             |WITH b
-             |MATCH (b)-[e2:BELONG]->(e:Entity:Region)
-             |SET e.company_num = e.company_num - 1
-             |WITH e
-             |MATCH (e)-[e3:BELONG]->(f:Entity:Region)
-             |SET f.company_num = f.company_num - 1
-         """.stripMargin,
-          s"""
-             |MATCH (a:Entity:Company { bbd_qyxx_id: "$bbd_qyxx_id" })-[e2:BELONG]->(b:Entity:Industry)
-             |SET b.company_num = b.company_num - 1
-             |DELETE e2
-         """.stripMargin,
-          s"""
              |MERGE (a:Entity:Company {bbd_qyxx_id: "$bbd_qyxx_id" })
              |${CommonFunctions.getCompanyProperty("a")}
              |ON CREATE SET a.create_time = timestamp()
