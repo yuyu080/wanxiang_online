@@ -12,6 +12,7 @@ import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010
 import org.apache.flink.streaming.util.serialization.SimpleStringSchema
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.api.java.utils.ParameterTool
+import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
 object WanxiangStreaming {
 
   def main(args: Array[String]) {
@@ -22,17 +23,22 @@ object WanxiangStreaming {
     * */
     //环境参数定义
     val env = StreamExecutionEnvironment.getExecutionEnvironment
+    val config = env.getCheckpointConfig
+    config.enableExternalizedCheckpoints(ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION)
+    //env.setStateBackend(new RocksDBStateBackend("hdfs:///checkpoints-data/")
+
     //minimize latency
     env.setBufferTimeout(5)
     env.enableCheckpointing(5000)
+    env.getCheckpointConfig.setMinPauseBetweenCheckpoints(1000)
     env.getCheckpointConfig.setMaxConcurrentCheckpoints(1)
     env.setRestartStrategy(RestartStrategies.fixedDelayRestart(3,Time.of(10,TimeUnit.SECONDS)))
     //flink exactly_once
     env.getCheckpointConfig.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE)
     val params = ParameterTool.fromArgs(args)
     //定义kafka 配置,KAFKA_BROKER和消费组
-    val KAFKA_BROKER = if (params.has("broker_list")) params.get("broker_list") else "10.28.40.11:9092,10.28.40.12:9092,10.28.40.13:9092,10.28.40.14:9092,10.28.40.15:9092"
-    val TRANSACTION_GROUP = if (params.has("group")) params.get("group") else "bbd_wanxiang_online_20171215"
+    val KAFKA_BROKER = if (params.has("broker_list")) params.get("broker_list") else "c6node15:9092,c6node16:9092,c6node17:9092"
+    val TRANSACTION_GROUP = if (params.has("group")) params.get("group") else "bbd_wanxiang_online_20171219"
     val topic = if(params.has("topic"))  params.get("topic") else "wanxiang_canal_20171213"
     val offset = if(params.has("offset"))  params.get("offset") else "latest"
     //初始化kafka topic
@@ -42,7 +48,7 @@ object WanxiangStreaming {
     kafkaProps.setProperty("bootstrap.servers", KAFKA_BROKER)
     kafkaProps.setProperty("group.id", TRANSACTION_GROUP)
     kafkaProps.setProperty("auto.offset.reset", offset)
-    kafkaProps.setProperty("fetch.message.max.bytes", "104857600")
+    //kafkaProps.setProperty("fetch.message.max.bytes", "104857600")
     kafkaProps.setProperty("max.partition.fetch.bytes", "104857600")
 
 
