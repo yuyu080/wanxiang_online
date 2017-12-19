@@ -62,7 +62,7 @@ object WanxiangStreaming {
       .addSink(new WanxiangSinkToNeo4j())
       .uid("wanxiang_sink")
 
-    env.execute("Wanxiang streaming data processing to neo4j9")
+    env.execute("Wanxiang streaming data processing to neo4j7")
 
   }
 
