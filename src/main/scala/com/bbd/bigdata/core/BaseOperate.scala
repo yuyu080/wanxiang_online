@@ -346,13 +346,12 @@ trait BaseOperate {
     def get_delete(str_one: String, str_two: String): String = {
       s"""
          |MATCH
-         |(a:Entity:${args("source_label")} {bbd_qyxx_id: "${args("source_id")}" }),
          |(c:Entity:Role:${CommonFunctions.upperCase(args("relation_type").toLowerCase)} {bbd_role_id: "${args("bbd_role_id")}" }),
          |(b:Entity:Company {bbd_qyxx_id: "${args("destination_id")}" })
          |SET b.update_time = timestamp() $str_one
          |DETACH DELETE c
-         |WITH a, b
-         |MATCH (a)-[:VIRTUAL]-(h:Entity:Role)-[:VIRTUAL]-(b) $str_two
+         |WITH b
+         |MATCH (a:Entity:${args("source_label")} {bbd_qyxx_id: "${args("source_id")}" })-[:VIRTUAL]-(h:Entity:Role)-[:VIRTUAL]-(b) $str_two
          |WITH a, b, h
          |WHERE NOT exists((a)-[:$role_type]-(:Entity:Role)-[:$role_type]-(b))
          |DETACH DELETE h
