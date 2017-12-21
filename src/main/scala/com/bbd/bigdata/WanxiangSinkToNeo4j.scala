@@ -59,15 +59,14 @@ object WanxiangSinkToNeo4j {
         tuple_cypher_message._2(0) match {
           case "MESSAGE_ERROR" => put_kafka_topic(in)
           case "SINK_TO_REDIS" => put_blacklist_redis(tuple_cypher_message._2(1))
-          case _ => session.writeTransaction(new TransactionWork[Unit]() {
-            override def execute(tx: Transaction): Unit = tuple_cypher_message._2.foreach(tx.run)
+          case _ => session.writeTransaction(new TransactionWork[Integer]() {
+            override def execute(tx: Transaction): Integer = createRelation(tx,tuple_cypher_message._2)//tuple_cypher_message._2.foreach(tx.run)
           })
         }
       }catch {
         case e: TransientException => e.printStackTrace()
         case e: ClientException => e.printStackTrace()
         case e: DatabaseException =>e.printStackTrace()
-
       }
       session.close()
     }
