@@ -12,7 +12,7 @@ import java.util.{Date, Properties}
 import kafka.producer.ProducerConfig
 import kafka.producer.Producer
 import kafka.producer.KeyedMessage
-import com.bbd.bigdata.redispro.RedisUtil
+import com.bbd.bigdata.redisCli.{RedisClient, RedisUtil}
 import org.neo4j.driver.v1.exceptions.{ClientException, DatabaseException, TransientException}
 
 import scala.util.Random
@@ -35,14 +35,13 @@ object WanxiangSinkToNeo4j {
       //neo4j 连接信息
       //测试neo4j bolt://10.28.102.33:7687  正式 bolt://10.28.52.151:7690 neo4j fyW1KFSYNfxRtw1ivAJOrnV3AKkaQUfB
       //正式 bolt://10.28.62.48:7687 wanxiangstream 2a3b73d7145adbf899536702ecc71855
-      val conn_addr = "bolt://10.28.62.50:7687"
+      val conn_addr = "bolt://10.28.62.48:7687"
       val user = "wanxiangstream"
       val passwd = "2a3b73d7145adbf899536702ecc71855"
       //加载驱动
 
       driver = GraphDatabase.driver(conn_addr, AuthTokens.basic(user, passwd), Config.build().withMaxTransactionRetryTime( 15,TimeUnit.SECONDS ).withEncryptionLevel(Config.EncryptionLevel.NONE).toConfig())
-      //jr = new redis.clients.jedis.Jedis("10.28.60.17", 26379)
-      //jr.auth("GcE3W5Le84aKbWgKe2A8");
+
     }
 
     override def invoke(in: String): Unit = {
@@ -52,31 +51,24 @@ object WanxiangSinkToNeo4j {
         * Exception processing
         */
       //一个tuple接收数据，包含（table_name,List<cypher>）
-      //println(in)
-      //put_kafka_topic(in)
+
       val session = driver.session()
       val tuple_cypher_message = CypherToNeo4j.getCypher(in)
 
       try{
         tuple_cypher_message._2(0) match {
-          case "MESSAGE_ERROR" => //put_kafka_topic(in)
-          case "SINK_TO_REDIS" => //put_blacklist_redis(tuple_cypher_message._2(1))
-          case _ => session.writeTransaction(new TransactionWork[Unit]() {
-            override def execute(tx: Transaction): Unit = tuple_cypher_message._2.foreach(tx.run)
+          case "MESSAGE_ERROR" => put_kafka_topic(in)
+          case "SINK_TO_REDIS" => put_blacklist_redis(tuple_cypher_message._2(1))
+          case _ => session.writeTransaction(new TransactionWork[Integer]() {
+            override def execute(tx: Transaction): Integer = createRelation(tx,tuple_cypher_message._2)//tuple_cypher_message._2.foreach(tx.run)
           })
         }
       }catch {
-        case e: TransientException => //Thread.sleep(new Random().nextInt(100))
-        case e: ClientException => put_kafka_topic(in)
-        case e: DatabaseException =>
-
-        //case e: Exception => e.printStackTrace()
+        case e: TransientException => e.printStackTrace()
+        case e: ClientException => e.printStackTrace()
+        case e: DatabaseException =>e.printStackTrace()
       }
-
       session.close()
-
-      //jr.sadd("wanxiang_test", (t4.getTime-t3.getTime)+" "+new Date())
-
     }
 
     def put_blacklist_redis(bbd_qyxx_id: String): Unit = {
@@ -86,10 +78,12 @@ object WanxiangSinkToNeo4j {
         * 将其写入redis 一个value的set
         * */
       try {
-        RedisUtil.getJedis.sadd("wx_graph_black_set", bbd_qyxx_id)
+        val jedis = RedisClient.pool.getResource
+        jedis.sadd("wx_graph_black_set", bbd_qyxx_id)
+        RedisClient.pool.returnResource(jedis)
       } catch {
         case e: Exception =>
-          println("redis error!"); e.printStackTrace()
+          println("redis error! "+new Date()); e.printStackTrace()
       }
 
     }
@@ -103,9 +97,9 @@ object WanxiangSinkToNeo4j {
       try {
         //读取配置文件，加载配置信息
         val props = new Properties()
-        props.put("bootstrap.servers", "10.28.40.11:9092,10.28.40.12:9092,10.28.40.13:9092,10.28.40.14:9092,10.28.40.15:9092")
+        props.put("metadata.broker.list", "c6node15:9092,c6node16:9092,c6node17:9092")
         props.put("request.required.acks", "1")
-        props.put("message.send.max.retries", "20")
+        //props.put("message.send.max.retries", "20")
         props.put("serializer.class", "kafka.serializer.StringEncoder")
         val config = new ProducerConfig(props)
         val producer = new Producer[String, String](config)
@@ -113,7 +107,7 @@ object WanxiangSinkToNeo4j {
         val keyedMessage = new KeyedMessage[String, String]("wanxiang_exception_20171019", String.valueOf(System.currentTimeMillis()), message)
         producer.send(keyedMessage)
       } catch {
-        case e: Exception => println("kafka error!"); e.printStackTrace()
+        case e: Exception => println("kafka error! "+ new Date()); e.printStackTrace()
       }
     }
 

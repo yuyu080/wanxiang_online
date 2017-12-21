@@ -140,7 +140,7 @@ trait BaseOperate {
     val event_time = CommonFunctions.toStandardDateTime {
       val result = info.get(event_time_column)
       if (result == null) "" else result.toString
-    }.toString + "-" + Random.nextInt(81000).toString
+    }.toString + "-" + Random.nextInt(300).toString
     val event_month = CommonFunctions.getDateTimeMonth(event_time)
     val event_year = CommonFunctions.getDateTimeYear(event_time)
     val event_label = CommonFunctions.upperCase(table_name)
