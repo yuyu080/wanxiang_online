@@ -191,6 +191,8 @@ trait BaseOperate {
              |MATCH (a:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })
              |MERGE (b:Entity:Time {time : "$event_time" })
              |MERGE (a)-[e1:BELONG]-(b)
+             |ON CREATE SET  e1.create_time = timestamp()
+             |SET e1.update_time = timestamp()
          """.stripMargin
         )
       )
@@ -344,19 +346,17 @@ trait BaseOperate {
     def get_delete(str_one: String, str_two: String): String = {
       s"""
          |MATCH
-         |(a:Entity:${args("source_label")})-[:${args("relation_type")}]->
-         |(c:Entity:Role:${CommonFunctions.upperCase(args("relation_type").toLowerCase)} {bbd_role_id: "${args("bbd_role_id")}" })-[:${args("relation_type")}]->
-         |(b:Entity:Company {bbd_qyxx_id: "${args("destination_id")}" })
+         |(b:Entity:Company {bbd_qyxx_id: "${args("destination_id")}" }),
+         |(c:Entity:Role:${CommonFunctions.upperCase(args("relation_type").toLowerCase)} {bbd_role_id: "${args("bbd_role_id")}" })
          |SET b.update_time = timestamp() $str_one
          |DETACH DELETE c
-         |WITH a, b
-         |MATCH (a)-[:VIRTUAL]->(h:Entity:Role)-[:VIRTUAL]->(b) $str_two
-         |WITH a, b, h
-         |WHERE NOT exists((a)-[:$role_type]->(:Entity:Role)-[:$role_type]->(b))
+         |WITH b
+         |MATCH (h:Entity:Role)-[:VIRTUAL]->(b) $str_two
+         |WITH b, h
+         |WHERE NOT exists((:Entity:Role)-[:$role_type]->(b))
          |DETACH DELETE h
        """.stripMargin
     }
-
 
     if(args("source_label") == "Company") {
       step_one =
@@ -426,8 +426,16 @@ trait BaseOperate {
         (
           args("table_name"),
           Array(
+            s"""
+               |MATCH
+               |(a:Entity:${args("source_label")})-[:${args("relation_type")}]->
+               |(c:Entity:Role:${CommonFunctions.upperCase(args("relation_type").toLowerCase)} {bbd_role_id: "${args("bbd_role_id")}" })-[:${args("relation_type")}]->
+               |(b:Entity:Company {bbd_qyxx_id: "${args("destination_id")}" })
+               |SET a.dwtzxx = a.dwtzxx - 1
+               |SET a.update_time = timestamp()
+             """.stripMargin,
             get_delete(
-              "SET a.dwtzxx = a.dwtzxx - 1 SET b.gdxx = b.gdxx - 1",
+              "SET b.gdxx = b.gdxx - 1",
               "SET h.relation_type = False"
             )
           )
