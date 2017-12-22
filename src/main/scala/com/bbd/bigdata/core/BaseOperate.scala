@@ -85,22 +85,12 @@ trait BaseOperate {
              |SET a.update_time = timestamp()
          """.stripMargin,
           s"""
-             |MATCH (a:Entity:Company {bbd_qyxx_id: "$bbd_qyxx_id" }),(b:Entity:Region {region_code : "$county" }),(e:Entity:Region {region_code : "$city" }),(f:Entity:Region {region_code : "$province" })
+             |MATCH (a:Entity:Company {bbd_qyxx_id: "$bbd_qyxx_id" }),(b:Entity:Region {region_code : "$county" })
              |MERGE (a)-[e1:BELONG]-(b)
-             |ON CREATE SET b.company_num = b.company_num + 1
-             |ON CREATE SET e.company_num = e.company_num + 1
-             |ON CREATE SET f.company_num = f.company_num + 1
-             |ON CREATE SET e1.create_time = timestamp()
-             |ON CREATE SET b.update_time = timestamp()
-             |ON CREATE SET e.update_time = timestamp()
-             |ON CREATE SET f.update_time = timestamp()
          """.stripMargin,
           s"""
              |MATCH (a:Entity:Company {bbd_qyxx_id: "$bbd_qyxx_id" }),(c:Entity:Industry {industry_code: "${info.get("company_industry").toString}" })
              |MERGE (a)-[e2:BELONG]-(c)
-             |ON CREATE SET c.company_num = c.company_num + 1
-             |ON CREATE SET e2.create_time = timestamp()
-             |ON CREATE SET c.update_time = timestamp()
          """.stripMargin
 
         )
