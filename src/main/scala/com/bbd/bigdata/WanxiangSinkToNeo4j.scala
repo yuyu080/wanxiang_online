@@ -67,6 +67,7 @@ object WanxiangSinkToNeo4j {
         case e: TransientException => e.printStackTrace()
         case e: ClientException => e.printStackTrace()
         case e: DatabaseException =>e.printStackTrace()
+        case e: java.lang.Exception => e.printStackTrace()
       }
       session.close()
     }
