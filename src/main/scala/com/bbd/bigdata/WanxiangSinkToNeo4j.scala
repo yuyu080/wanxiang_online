@@ -64,9 +64,9 @@ object WanxiangSinkToNeo4j {
           })
         }
       }catch {
-        case e: TransientException => e.printStackTrace();put_kafka_topic(in)
-        case e: ClientException => e.printStackTrace();put_kafka_topic(in)
-        case e: DatabaseException =>e.printStackTrace();put_kafka_topic(in)
+        case e: TransientException => e.printStackTrace();put_kafka_topic(in+e.toString)
+        case e: ClientException => e.printStackTrace();put_kafka_topic(in+e.toString)
+        case e: DatabaseException =>e.printStackTrace();put_kafka_topic(in+e.toString)
       }
       session.close()
     }
