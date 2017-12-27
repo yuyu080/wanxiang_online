@@ -64,10 +64,9 @@ object WanxiangSinkToNeo4j {
           })
         }
       }catch {
-        case e: TransientException => e.printStackTrace()
-        case e: ClientException => e.printStackTrace()
-        case e: DatabaseException =>e.printStackTrace()
-        case e: java.lang.Exception => e.printStackTrace()
+        case e: TransientException => e.printStackTrace();put_kafka_topic(in)
+        case e: ClientException => e.printStackTrace();put_kafka_topic(in)
+        case e: DatabaseException =>e.printStackTrace();put_kafka_topic(in)
       }
       session.close()
     }
@@ -86,7 +85,6 @@ object WanxiangSinkToNeo4j {
         case e: Exception =>
           println("redis error! "+new Date()); e.printStackTrace()
       }
-
     }
 
     def put_kafka_topic(message: String): Unit = {
@@ -117,11 +115,7 @@ object WanxiangSinkToNeo4j {
       * 所有cypher包含在一个事务里
       * 顺序执行，异常捕获，0：异常，1：无异常
       * */
-      try {
-        cypher_list.foreach(tx.run)
-      } catch {
-        case e: Exception => println("Cypher execution error!"); e.printStackTrace(); 0
-      }
+      cypher_list.foreach(tx.run)
       1
     }
 
