@@ -40,7 +40,7 @@ object WanxiangSinkToNeo4j {
       val passwd = "2a3b73d7145adbf899536702ecc71855"
       //加载驱动
 
-      driver = GraphDatabase.driver(conn_addr, AuthTokens.basic(user, passwd), Config.build().withMaxTransactionRetryTime( 15,TimeUnit.SECONDS ).withEncryptionLevel(Config.EncryptionLevel.NONE).toConfig())
+      driver = GraphDatabase.driver(conn_addr, AuthTokens.basic(user, passwd), Config.build().withMaxSessions(1).withMaxTransactionRetryTime( 15,TimeUnit.SECONDS ).toConfig())
 
     }
 
