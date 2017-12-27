@@ -64,9 +64,9 @@ object WanxiangSinkToNeo4j {
           })
         }
       }catch {
-        case e: TransientException => e.printStackTrace();message_process_retry(in,session,tuple_cypher_message._2,1)
-        case e: ClientException => e.printStackTrace();message_process_retry(in,session,tuple_cypher_message._2,3)
-        case e: DatabaseException =>e.printStackTrace();put_kafka_topic(in+e.toString)
+        case e: TransientException => put_kafka_topic(in+e.toString)
+        case e: ClientException => put_kafka_topic(in+e.toString)
+        case e: DatabaseException => put_kafka_topic(in+e.toString)
       }
       session.close()
     }
@@ -79,7 +79,6 @@ object WanxiangSinkToNeo4j {
             })
         }catch {
           case e: ClientException => message_process_retry(in,session,cypher_list,retry_times-1)
-
         }
       }else{
         put_kafka_topic(in)
