@@ -29,7 +29,7 @@ object WanxiangStreaming {
 
     //minimize latency
     env.setBufferTimeout(5)
-    env.enableCheckpointing(5000)
+    env.enableCheckpointing(10*60*1000)
     env.getCheckpointConfig.setMinPauseBetweenCheckpoints(1000)
     env.getCheckpointConfig.setMaxConcurrentCheckpoints(1)
     env.setRestartStrategy(RestartStrategies.fixedDelayRestart(3,Time.of(10,TimeUnit.SECONDS)))

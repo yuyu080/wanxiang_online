@@ -64,11 +64,27 @@ object WanxiangSinkToNeo4j {
           })
         }
       }catch {
-        case e: TransientException => e.printStackTrace();put_kafka_topic(in+e.toString)
-        case e: ClientException => e.printStackTrace();put_kafka_topic(in+e.toString)
+        case e: TransientException => e.printStackTrace();message_process_retry(in,session,tuple_cypher_message._2,1)
+        case e: ClientException => e.printStackTrace();message_process_retry(in,session,tuple_cypher_message._2,3)
         case e: DatabaseException =>e.printStackTrace();put_kafka_topic(in+e.toString)
       }
       session.close()
+    }
+
+    def message_process_retry(in: String,session: Session, cypher_list: Array[String], retry_times: Int): Unit = {
+      if(retry_times > 0){
+        try{
+          session.writeTransaction(new TransactionWork[Integer]() {
+            override def execute(tx: Transaction): Integer = createRelation(tx,cypher_list)//tuple_cypher_message._2.foreach(tx.run)
+            })
+        }catch {
+          case e: ClientException => message_process_retry(in,session,cypher_list,retry_times-1)
+
+        }
+      }else{
+        put_kafka_topic(in)
+      }
+
     }
 
     def put_blacklist_redis(bbd_qyxx_id: String): Unit = {
