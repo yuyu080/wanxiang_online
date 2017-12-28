@@ -67,7 +67,7 @@ object WanxiangStreaming {
       .uid("wanxiang_source")
 
       .assignTimestampsAndWatermarks(
-        new BoundedOutOfOrdernessTimestampExtractor[String](org.apache.flink.streaming.api.windowing.time.Time.minutes(3)) {
+        new BoundedOutOfOrdernessTimestampExtractor[String](org.apache.flink.streaming.api.windowing.time.Time.seconds(3)) {
           override def extractTimestamp(t: String): Long = {
             try{
               val obj = CommonFunctions.jsonToObj(t)
@@ -93,8 +93,8 @@ object WanxiangStreaming {
             case e : Exception => "412389d6cc9cd963e7d8cd2df4490222"
           }
         })
-        .window(TumblingEventTimeWindows.of(org.apache.flink.streaming.api.windowing.time.Time.minutes(3)))
-        .apply(new MyKeyWindowFunction[String,String,TimeWindow]).uid("window_operation")
+        .window(TumblingEventTimeWindows.of(org.apache.flink.streaming.api.windowing.time.Time.seconds(3)))
+        .apply(new MyKeyWindowFunction[String,String,List[String],TimeWindow]).uid("window_operation")
 
       .addSink(new WanxiangSinkToNeo4j())
       .uid("wanxiang_sink")

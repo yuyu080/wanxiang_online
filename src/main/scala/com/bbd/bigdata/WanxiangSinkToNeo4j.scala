@@ -24,7 +24,7 @@ object WanxiangSinkToNeo4j {
   * 自定义flink sink ，结合我们的使用场景，实现richsinkfunction
   * 主要重写三个方法open(),invoke(),close()
   * */
-  class WanxiangSinkToNeo4j extends RichSinkFunction[String] {
+  class WanxiangSinkToNeo4j extends RichSinkFunction[List[String]] {
     private var driver: Driver = null
     //private var jr: redis.clients.jedis.Jedis =null
 
@@ -44,31 +44,33 @@ object WanxiangSinkToNeo4j {
 
     }
 
-    override def invoke(in: String): Unit = {
+    override def invoke(input: List[String]): Unit = {
       /**
         * invoke()方法通过json信息，获取相应cypher，并插入到数据库中。
         * in 输入的数据
         * Exception processing
         */
       //一个tuple接收数据，包含（table_name,List<cypher>）
+      for(in <- input){
+        val session = driver.session()
+        val tuple_cypher_message = CypherToNeo4j.getCypher(in)
 
-      val session = driver.session()
-      val tuple_cypher_message = CypherToNeo4j.getCypher(in)
-
-      try{
-        tuple_cypher_message._2(0) match {
-          case "MESSAGE_ERROR" => put_kafka_topic(in)
-          case "SINK_TO_REDIS" => put_blacklist_redis(tuple_cypher_message._2(1))
-          case _ => session.writeTransaction(new TransactionWork[Integer]() {
-            override def execute(tx: Transaction): Integer = createRelation(tx,tuple_cypher_message._2)//tuple_cypher_message._2.foreach(tx.run)
-          })
+        try{
+          tuple_cypher_message._2(0) match {
+            case "MESSAGE_ERROR" => put_kafka_topic(in)
+            case "SINK_TO_REDIS" => put_blacklist_redis(tuple_cypher_message._2(1))
+            case _ => session.writeTransaction(new TransactionWork[Integer]() {
+              override def execute(tx: Transaction): Integer = createRelation(tx,tuple_cypher_message._2)//tuple_cypher_message._2.foreach(tx.run)
+            })
+          }
+        }catch {
+          case e: TransientException => e.printStackTrace();put_kafka_topic(in)
+          case e: ClientException => e.printStackTrace();put_kafka_topic(in)
+          case e: DatabaseException =>e.printStackTrace();put_kafka_topic(in)
         }
-      }catch {
-        case e: TransientException => e.printStackTrace();put_kafka_topic(in)
-        case e: ClientException => e.printStackTrace();put_kafka_topic(in)
-        case e: DatabaseException =>e.printStackTrace();put_kafka_topic(in)
+        session.close()
       }
-      session.close()
+
     }
 
     def put_blacklist_redis(bbd_qyxx_id: String): Unit = {

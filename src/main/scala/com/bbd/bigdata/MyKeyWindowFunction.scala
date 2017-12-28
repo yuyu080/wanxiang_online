@@ -5,10 +5,10 @@ import org.apache.flink.util.Collector
 import org.apache.flink.streaming.api.windowing.windows.Window
 import com.bbd.bigdata.util.CommonFunctions
 
-class MyKeyWindowFunction[K,T<: String,W <: Window] extends WindowFunction[T,T,K,W]{
-  override def apply(key: K, window: W, input: Iterable[T], out: Collector[T]): Unit = {
+class MyKeyWindowFunction[K, IN>: String, OUT>: List[IN], W <: Window] extends WindowFunction[IN,OUT,K,W]{
+  override def apply(key: K, window: W, input: Iterable[IN], out: Collector[OUT]): Unit = {
     val it = input.iterator
-    val list = scala.collection.mutable.ListBuffer[T]()
+    val list = scala.collection.mutable.ListBuffer[IN]()
     while(it.hasNext){
       list += it.next()
     }
@@ -20,8 +20,6 @@ class MyKeyWindowFunction[K,T<: String,W <: Window] extends WindowFunction[T,T,K
         case e : Exception => " "
       }
     }
-    for(in <- result){
-      out.collect(in)
-    }
+    out.collect(result)
   }
 }
