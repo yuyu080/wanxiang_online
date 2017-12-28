@@ -78,11 +78,11 @@ trait BaseOperate {
              |SET a.province = "$province_name"
              |SET a.city = "$city_name"
              |SET a.county = "$county_name"
-             |SET a.Industry = "${info.get("company_industry").toString}"
+             |SET a.company_industry = "${info.get("company_industry").toString}"
              |SET a.company_type = "${info.get("company_companytype").toString.replace(",", "").replace("\"", "")}"
-             |SET a.regcap = ${if(regcap_amount == "") "0.0" else regcap_amount}
+             |SET a.regcap_amount = ${if(regcap_amount == "") "0.0" else regcap_amount}
              |SET a.regcap_currency  = "${if(regcap_currency == "") "-" else regcap_currency}"
-             |SET a.realcap = ${if(realcap_amount == "") "0.0" else realcap_amount}
+             |SET a.realcap_amount = ${if(realcap_amount == "") "0.0" else realcap_amount}
              |SET a.realcap_currency = "${if(realcap_currency == "") "-" else realcap_currency}"
              |SET a.update_time = timestamp()
          """.stripMargin,
