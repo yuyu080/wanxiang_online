@@ -42,7 +42,7 @@ object WanxiangSinkToNeo4j {
       val passwd = "2a3b73d7145adbf899536702ecc71855"
       //加载驱动
 
-      driver = GraphDatabase.driver(conn_addr, AuthTokens.basic(user, passwd), Config.build().withMaxTransactionRetryTime( 15,TimeUnit.SECONDS ).withEncryptionLevel(Config.EncryptionLevel.NONE).toConfig())
+      driver = GraphDatabase.driver(conn_addr, AuthTokens.basic(user, passwd), Config.build().withMaxSessions(1).withMaxTransactionRetryTime( 15,TimeUnit.SECONDS ).toConfig())
 
     }
 
@@ -102,6 +102,21 @@ object WanxiangSinkToNeo4j {
         }
       }
       session.close()
+    }
+
+    def message_process_retry(in: String,session: Session, cypher_list: Array[String], retry_times: Int): Unit = {
+      if(retry_times > 0){
+        try{
+          session.writeTransaction(new TransactionWork[Integer]() {
+            override def execute(tx: Transaction): Integer = createRelation(tx,cypher_list)//tuple_cypher_message._2.foreach(tx.run)
+            })
+        }catch {
+          case e: ClientException => message_process_retry(in,session,cypher_list,retry_times-1)
+        }
+      }else{
+        put_kafka_topic(in)
+      }
+
     }
 
     def put_blacklist_redis(bbd_qyxx_id: String): Unit = {

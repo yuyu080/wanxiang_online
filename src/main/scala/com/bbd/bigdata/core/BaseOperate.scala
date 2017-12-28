@@ -48,6 +48,8 @@ trait BaseOperate {
     val province_name = getRegionName(province)
     val regcap_amount = info.get("regcap_amount").toString
     val realcap_amount = info.get("realcap_amount").toString
+    val regcap_currency = info.get("regcap_currency").toString
+    val realcap_currency = info.get("realcap_currency").toString
 
     if (event_type == "DELETE") {
       //企业节点不能被直接删除
@@ -76,12 +78,12 @@ trait BaseOperate {
              |SET a.province = "$province_name"
              |SET a.city = "$city_name"
              |SET a.county = "$county_name"
-             |SET a.Industry = "${info.get("company_industry").toString}"
+             |SET a.company_industry = "${info.get("company_industry").toString}"
              |SET a.company_type = "${info.get("company_companytype").toString.replace(",", "").replace("\"", "")}"
-             |SET a.regcap = ${if(regcap_amount == "") "0.0" else regcap_amount}
-             |SET a.regcap_currency  = "${info.get("regcap_currency").toString}"
-             |SET a.realcap = ${if(realcap_amount == "") "0.0" else realcap_amount}
-             |SET a.realcap_currency = "${info.get("realcap_currency").toString}"
+             |SET a.regcap_amount = ${if(regcap_amount == "") "0.0" else regcap_amount}
+             |SET a.regcap_currency  = "${if(regcap_currency == "") "-" else regcap_currency}"
+             |SET a.realcap_amount = ${if(realcap_amount == "") "0.0" else realcap_amount}
+             |SET a.realcap_currency = "${if(realcap_currency == "") "-" else realcap_currency}"
              |SET a.update_time = timestamp()
          """.stripMargin,
           s"""
@@ -182,7 +184,6 @@ trait BaseOperate {
              |MERGE (b:Entity:Time {time : "$event_time" })
              |MERGE (a)-[e1:BELONG]-(b)
              |ON CREATE SET  e1.create_time = timestamp()
-             |SET e1.update_time = timestamp()
          """.stripMargin
         )
       )
@@ -250,9 +251,11 @@ trait BaseOperate {
                  |MERGE (a:Entity:Company {bbd_qyxx_id: "$bbd_qyxx_id" })
                  |${CommonFunctions.getCompanyProperty("a")}
                  |ON CREATE SET a.create_time = timestamp()
+                 |ON CREATE SET a.update_time = timestamp()
                  |WITH a
                  |MERGE (b:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })
                  |ON CREATE SET b.create_time = timestamp()
+                 |ON CREATE SET b.update_time = timestamp()
                  |WITH a, b
                  |MERGE (a)-[e1:$relation_type]->(b)
                  |ON CREATE SET e1.create_time = timestamp()
@@ -270,9 +273,11 @@ trait BaseOperate {
                  |MERGE (a:Entity:Company {bbd_qyxx_id: "$bbd_qyxx_id" })
                  |${CommonFunctions.getCompanyProperty("a")}
                  |ON CREATE SET a.create_time = timestamp()
+                 |ON CREATE SET a.update_time = timestamp()
                  |WITH a
                  |MERGE (b:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })
                  |ON CREATE SET b.create_time = timestamp()
+                 |ON CREATE SET b.update_time = timestamp()
                  |WITH a, b
                  |MERGE (a)-[e1:$relation_type]->(b)
                  |ON CREATE SET e1.create_time = timestamp()
