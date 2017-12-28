@@ -28,7 +28,7 @@ object WanxiangStreaming {
     * */
     //环境参数定义
     val env = StreamExecutionEnvironment.getExecutionEnvironment
-    env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime)
+    //env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime)
     val config = env.getCheckpointConfig
     config.enableExternalizedCheckpoints(ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION)
     //env.setStateBackend(new RocksDBStateBackend("hdfs:///checkpoints-data/")
