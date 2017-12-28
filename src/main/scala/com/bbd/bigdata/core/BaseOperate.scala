@@ -20,7 +20,7 @@ trait BaseOperate {
       region_properties.load(in)
       region_properties.getProperty(company_county).split("\\|")
     }.recover {
-      case e: Throwable => Array("", "")
+      case e: Throwable => Array("-", "-")
     }.get
 
     //获取地域名称
@@ -30,8 +30,30 @@ trait BaseOperate {
       region_properties.load(in)
       new String(region_properties.getProperty(company_county).getBytes("ISO-8859-1"), "utf-8")
     }.recover {
-      case e: Throwable => ""
+      case e: Throwable => "-"
     }.get
+
+    //获取区市省的名称
+    def getArea(company_county:String) = {
+      val in = getRegionInfo(company_county)
+      if (in(0) != "-" && in(1) != "-") {
+        (getRegionName(company_county), getRegionName(in(0)), getRegionName(in(1)))
+      } else if (in(0) != "-" && in(1) == "-") {
+        ("-", getRegionName(company_county), getRegionName(in(0)))
+      } else {
+        ("-", "-", getRegionName(company_county))
+      }
+    }
+
+    //获得区域ID
+    def getCountyCode(company_county:String) = {
+      val in = getRegionInfo(company_county)
+      if (in(0) != "-" && in(1) != "-") {
+        company_county
+      } else {
+        "-"
+      }
+    }
 
     /*
      *根据操作类型，返回不同的Cypther
@@ -40,12 +62,13 @@ trait BaseOperate {
     val table_name = info.get("canal_table").toString.replace("_canal", "")
     val bbd_qyxx_id = info.get("bbd_qyxx_id").toString
     val event_type = info.get("canal_eventtype").toString
-    val county = info.get("company_county").toString
-    val county_name = getRegionName(county)
-    val city = getRegionInfo(county)(0)
-    val city_name = getRegionName(city)
-    val province = getRegionInfo(county)(1)
-    val province_name = getRegionName(province)
+
+    val area = getArea(info.get("company_county").toString)
+    val county = getCountyCode(info.get("company_county").toString)
+    val county_name = area._1
+    val city_name = area._2
+    val province_name = area._3
+
     val regcap_amount = info.get("regcap_amount").toString
     val realcap_amount = info.get("realcap_amount").toString
     val regcap_currency = info.get("regcap_currency").toString
