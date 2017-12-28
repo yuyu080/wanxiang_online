@@ -167,6 +167,7 @@ trait BaseOperate {
         if(company_property_name != "") {
           s"""
              |MATCH (a:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })-[:${table_name.toUpperCase}]-(b:Company)
+             |SET a.update_time = timestamp()
              |SET b.$company_property_name = b.$company_property_name - 1
              |SET b.update_time = timestamp()
            """.stripMargin
@@ -183,6 +184,7 @@ trait BaseOperate {
         Array(
           s"""
              |MATCH (a:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })-[e1:BELONG]-(b:Entity:Time {time : "$event_time"})
+             |SET a.update_time = timestamp()
              |DELETE e1
            """.stripMargin,
           change_company_property,
@@ -274,17 +276,16 @@ trait BaseOperate {
                  |MERGE (a:Entity:Company {bbd_qyxx_id: "$bbd_qyxx_id" })
                  |${CommonFunctions.getCompanyProperty("a")}
                  |ON CREATE SET a.create_time = timestamp()
-                 |ON CREATE SET a.update_time = timestamp()
+                 |SET a.update_time = timestamp()
                  |WITH a
                  |MERGE (b:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })
                  |ON CREATE SET b.create_time = timestamp()
-                 |ON CREATE SET b.update_time = timestamp()
+                 |SET b.update_time = timestamp()
                  |WITH a, b
                  |MERGE (a)-[e1:$relation_type]->(b)
                  |ON CREATE SET e1.create_time = timestamp()
                  |ON CREATE SET e1.id_type = ${if(info.get("id_type") == null) 0 else info.get("id_type").toString}
                  |ON CREATE SET a.$company_property_name = a.$company_property_name + 1
-                 |ON CREATE SET a.update_time = timestamp()
              """.stripMargin
             )
           )
@@ -296,11 +297,11 @@ trait BaseOperate {
                  |MERGE (a:Entity:Company {bbd_qyxx_id: "$bbd_qyxx_id" })
                  |${CommonFunctions.getCompanyProperty("a")}
                  |ON CREATE SET a.create_time = timestamp()
-                 |ON CREATE SET a.update_time = timestamp()
+                 |SET a.update_time = timestamp()
                  |WITH a
                  |MERGE (b:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })
                  |ON CREATE SET b.create_time = timestamp()
-                 |ON CREATE SET b.update_time = timestamp()
+                 |SET b.update_time = timestamp()
                  |WITH a, b
                  |MERGE (a)-[e1:$relation_type]->(b)
                  |ON CREATE SET e1.create_time = timestamp()
@@ -382,10 +383,12 @@ trait BaseOperate {
            |MERGE (a:Entity:Company {bbd_qyxx_id: "${args("source_id")}" })
            |${CommonFunctions.getCompanyProperty("a")}
            |ON CREATE SET a.create_time = timestamp()
+           |SET a.update_time = timestamp()
            |WITH a
            |MERGE (b:Entity:Company {bbd_qyxx_id: "${args("destination_id")}" })
            |${CommonFunctions.getCompanyProperty("b")}
            |ON CREATE SET b.create_time = timestamp()
+           |SET b.update_time = timestamp()
            |WITH a, b """.stripMargin
     } else if(args("source_label") == "Person") {
       step_one =
@@ -399,6 +402,7 @@ trait BaseOperate {
            |MERGE (b:Entity:Company {bbd_qyxx_id: "${args("destination_id")}" })
            |${CommonFunctions.getCompanyProperty("b")}
            |ON CREATE SET b.create_time = timestamp()
+           |SET b.update_time = timestamp()
            |WITH a, b """.stripMargin
     } else {
       return (args("table_name"), Array("MESSAGE_ERROR"))
