@@ -168,13 +168,20 @@ trait BaseOperate {
           s"""
              |MATCH (a:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })-[:${table_name.toUpperCase}]-(b:Company)
              |SET a.update_time = timestamp()
-             |SET b.$company_property_name = b.$company_property_name - 1
              |SET b.update_time = timestamp()
+             |WITH a,b
+             |MATCH (a)-[:${table_name.toUpperCase}]-(b)
+             |SET b.$company_property_name = b.$company_property_name - 1
+             |DETACH DELETE a
            """.stripMargin
         } else {
           s"""
              |MATCH (a:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })-[:${table_name.toUpperCase}]-(b:Company)
-             |RETURN a
+             |SET a.update_time = timestamp()
+             |SET b.update_time = timestamp()
+             |WITH a,b
+             |MATCH (a)-[:${table_name.toUpperCase}]-(b)
+             |DETACH DELETE a
            """.stripMargin
         }
       }
@@ -182,16 +189,7 @@ trait BaseOperate {
       (
         table_name,
         Array(
-          s"""
-             |MATCH (a:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })-[e1:BELONG]-(b:Entity:Time {time : "$event_time"})
-             |SET a.update_time = timestamp()
-             |DELETE e1
-           """.stripMargin,
-          change_company_property,
-          s"""
-             |MATCH (a:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })
-             |DETACH DELETE a
-           """.stripMargin
+          change_company_property
         )
       )
     } else if(event_type == "INSERT" | event_type == "UPDATE") {
@@ -248,11 +246,15 @@ trait BaseOperate {
             table_name,
             Array(
               s"""
-                 |MATCH (a:Entity:Company {bbd_qyxx_id: "$bbd_qyxx_id" })-[e1:$relation_type]->(b:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })
+                 |MATCH
+                 |(a:Entity:Company {bbd_qyxx_id: "$bbd_qyxx_id" }),
+                 |(b:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })
                  |SET a.update_time = timestamp()
+                 |SET b.update_time = timestamp()
+                 |WITH a,b
+                 |MATCH (a)-[e1:$relation_type]->(b)
                  |SET a.$company_property_name = a.$company_property_name - 1
-                 |WITH e1
-                 |DELETE e1
+                 |DETACH DELETE b
              """.stripMargin
             )
           )
@@ -366,12 +368,18 @@ trait BaseOperate {
       s"""
          |MATCH
          |(c:Entity:Role:${CommonFunctions.upperCase(args("relation_type").toLowerCase)} {bbd_role_id: "${args("bbd_role_id")}" }),
-         |(b:Entity:Company {bbd_qyxx_id: "${args("destination_id")}" })
-         |SET b.update_time = timestamp() $str_one
+         |(b:Entity:Company {bbd_qyxx_id: "${args("destination_id")}" }),
+         |(a:Entity:${args("source_label")} {bbd_qyxx_id: "${args("source_id")}" })
+         |SET a.update_time = timestamp()
+         |SET b.update_time = timestamp()
+         |SET c.update_time = timestamp()
+         |WITH a,b,c
+         |MATCH (c)-[:${args("relation_type")}]->(b)
+         |$str_one
          |DETACH DELETE c
-         |WITH b
-         |MATCH (a:Entity:${args("source_label")} {bbd_qyxx_id: "${args("source_id")}" })-[:VIRTUAL]-(h:Entity:Role)-[:VIRTUAL]-(b) $str_two
-         |WITH a, b, h
+         |WITH a,b
+         |MATCH (a)-[:VIRTUAL]-(h:Entity:Role)-[:VIRTUAL]-(b) $str_two
+         |WITH a,b,h
          |WHERE NOT exists((a)-[:$role_type]-(:Entity:Role)-[:$role_type]-(b))
          |DETACH DELETE h
        """.stripMargin
@@ -453,8 +461,12 @@ trait BaseOperate {
                |(a:Entity:${args("source_label")})-[:${args("relation_type")}]->
                |(c:Entity:Role:${CommonFunctions.upperCase(args("relation_type").toLowerCase)} {bbd_role_id: "${args("bbd_role_id")}" })-[:${args("relation_type")}]->
                |(b:Entity:Company {bbd_qyxx_id: "${args("destination_id")}" })
-               |SET a.dwtzxx = a.dwtzxx - 1
                |SET a.update_time = timestamp()
+               |WITH a,b,c
+               |MATCH (a)-[:INVEST]-(c)-[:INVEST]->(b)
+               |SET a.dwtzxx = a.dwtzxx - 1
+               |SET b.update_time = timestamp()
+               |SET c.update_time = timestamp()
              """.stripMargin,
             get_delete(
               "SET b.gdxx = b.gdxx - 1",
