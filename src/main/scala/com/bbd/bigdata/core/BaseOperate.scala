@@ -184,7 +184,6 @@ trait BaseOperate {
              |MERGE (b:Entity:Time {time : "$event_time" })
              |MERGE (a)-[e1:BELONG]-(b)
              |ON CREATE SET  e1.create_time = timestamp()
-             |SET e1.update_time = timestamp()
          """.stripMargin
         )
       )
@@ -252,9 +251,11 @@ trait BaseOperate {
                  |MERGE (a:Entity:Company {bbd_qyxx_id: "$bbd_qyxx_id" })
                  |${CommonFunctions.getCompanyProperty("a")}
                  |ON CREATE SET a.create_time = timestamp()
+                 |ON CREATE SET a.update_time = timestamp()
                  |WITH a
                  |MERGE (b:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })
                  |ON CREATE SET b.create_time = timestamp()
+                 |ON CREATE SET b.update_time = timestamp()
                  |WITH a, b
                  |MERGE (a)-[e1:$relation_type]->(b)
                  |ON CREATE SET e1.create_time = timestamp()
@@ -272,9 +273,11 @@ trait BaseOperate {
                  |MERGE (a:Entity:Company {bbd_qyxx_id: "$bbd_qyxx_id" })
                  |${CommonFunctions.getCompanyProperty("a")}
                  |ON CREATE SET a.create_time = timestamp()
+                 |ON CREATE SET a.update_time = timestamp()
                  |WITH a
                  |MERGE (b:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })
                  |ON CREATE SET b.create_time = timestamp()
+                 |ON CREATE SET b.update_time = timestamp()
                  |WITH a, b
                  |MERGE (a)-[e1:$relation_type]->(b)
                  |ON CREATE SET e1.create_time = timestamp()
