@@ -66,35 +66,35 @@ object WanxiangStreaming {
       //.map(CypherToNeo4j.getCypher(_)._2).filter(_.length>1).map(process_message(_)).rebalance.writeAsText("/data1/datawarehouse/data/flink_20171214").setParallelism(1)
       .uid("wanxiang_source")
 
-      .assignTimestampsAndWatermarks(
-        new BoundedOutOfOrdernessTimestampExtractor[String](org.apache.flink.streaming.api.windowing.time.Time.seconds(3)) {
-          override def extractTimestamp(t: String): Long = {
-            try{
-              val obj = CommonFunctions.jsonToObj(t)
-              val s = obj.get("canal_time").toString
-              val timeformat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
-              val time = timeformat.parse(s).getTime
-              time
-            } catch {
-              case e : Exception => 1420041600000L
-            }
-          }
-        }).uid("timestamp_and_watermark")
-
-        .keyBy(input => {
-          try{
-            val obj = CommonFunctions.jsonToObj(input)
-            var key = obj.get("bbd_xgxx_id")
-            if(key == null){
-              key = obj.get("bbd_qyxx_id").toString
-            }
-            key.toString
-          } catch {
-            case e : Exception => "412389d6cc9cd963e7d8cd2df4490222"
-          }
-        })
-        .window(TumblingEventTimeWindows.of(org.apache.flink.streaming.api.windowing.time.Time.seconds(3)))
-        .apply(new MyKeyWindowFunction[String,String,List[String],TimeWindow]).uid("window_operation")
+//      .assignTimestampsAndWatermarks(
+//        new BoundedOutOfOrdernessTimestampExtractor[String](org.apache.flink.streaming.api.windowing.time.Time.seconds(3)) {
+//          override def extractTimestamp(t: String): Long = {
+//            try{
+//              val obj = CommonFunctions.jsonToObj(t)
+//              val s = obj.get("canal_time").toString
+//              val timeformat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
+//              val time = timeformat.parse(s).getTime
+//              time
+//            } catch {
+//              case e : Exception => 1420041600000L
+//            }
+//          }
+//        }).uid("timestamp_and_watermark")
+//
+//        .keyBy(input => {
+//          try{
+//            val obj = CommonFunctions.jsonToObj(input)
+//            var key = obj.get("bbd_xgxx_id")
+//            if(key == null){
+//              key = obj.get("bbd_qyxx_id").toString
+//            }
+//            key.toString
+//          } catch {
+//            case e : Exception => "412389d6cc9cd963e7d8cd2df4490222"
+//          }
+//        })
+//        .window(TumblingEventTimeWindows.of(org.apache.flink.streaming.api.windowing.time.Time.seconds(3)))
+//        .apply(new MyKeyWindowFunction[String,String,List[String],TimeWindow]).uid("window_operation")
 
       .addSink(new WanxiangSinkToNeo4j())
       .uid("wanxiang_sink")
