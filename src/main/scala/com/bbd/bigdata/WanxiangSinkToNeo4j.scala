@@ -16,6 +16,8 @@ import com.bbd.bigdata.redisCli.{RedisClient, RedisUtil}
 import org.neo4j.driver.v1.exceptions.{ClientException, DatabaseException, TransientException}
 
 import scala.util.Random
+import com.alibaba.fastjson._
+import scala.util.control._
 
 
 object WanxiangSinkToNeo4j {
@@ -44,29 +46,60 @@ object WanxiangSinkToNeo4j {
 
     }
 
-    override def invoke(in: String): Unit = {
+    override def invoke(input: String): Unit = {
       /**
         * invoke()方法通过json信息，获取相应cypher，并插入到数据库中。
         * in 输入的数据
         * Exception processing
         */
-      //一个tuple接收数据，包含（table_name,List<cypher>）
-
       val session = driver.session()
-      val tuple_cypher_message = CypherToNeo4j.getCypher(in)
-
-      try{
-        tuple_cypher_message._2(0) match {
-          case "MESSAGE_ERROR" => put_kafka_topic(in)
-          case "SINK_TO_REDIS" => put_blacklist_redis(tuple_cypher_message._2(1))
-          case _ => session.writeTransaction(new TransactionWork[Integer]() {
-            override def execute(tx: Transaction): Integer = createRelation(tx,tuple_cypher_message._2)//tuple_cypher_message._2.foreach(tx.run)
-          })
+      var table_name = ""
+      val final_list = scala.collection.mutable.ListBuffer[String]()
+      var i = 0
+      var str = "messageId_"+i
+      val obj = JSON.parseObject(input)
+      while(obj.get(str)!=null){
+        val in = obj.get(str).toString
+        i = i+1
+        str = "messageId_"+i
+        //一个tuple接收数据，包含（table_name,List<cypher>）
+        val tmp_message = CypherToNeo4j.getCypher(in)
+        table_name = tmp_message._1
+        val it = tmp_message._2.iterator
+        while(it.hasNext){
+          final_list += it.next()
         }
-      }catch {
-        case e: TransientException => put_kafka_topic(in+e.toString)
-        case e: ClientException => put_kafka_topic(in+e.toString)
-        case e: DatabaseException => put_kafka_topic(in+e.toString)
+      }
+      var tuple_cypher_message = (table_name,final_list.toArray)
+      if(tuple_cypher_message._2.contains("MESSAGE_ERROR")){
+        tuple_cypher_message = (table_name, Array("MESSAGE_ERROR"))
+      }
+      var count = 0
+      val loop = new Breaks
+      loop.breakable{
+        while(count<4){
+          count = count+1
+          try{
+            tuple_cypher_message._2(0) match {
+              case "MESSAGE_ERROR" => put_kafka_topic(input)
+              case "SINK_TO_REDIS" =>
+                val len = tuple_cypher_message._2.length
+                var i = 1
+                while (i <= len - 1){
+                  put_blacklist_redis(tuple_cypher_message._2(i))
+                  i = i + 2
+                }
+              case _ => session.writeTransaction(new TransactionWork[Integer]() {
+                override def execute(tx: Transaction): Integer = createRelation(tx,tuple_cypher_message._2)//tuple_cypher_message._2.foreach(tx.run)
+              })
+            }
+            loop.break
+          }catch {
+            case e: TransientException => e.printStackTrace();put_kafka_topic(input);loop.break
+            case e: ClientException => e.printStackTrace();put_kafka_topic(input);Thread.sleep(100)
+            case e: DatabaseException =>e.printStackTrace();put_kafka_topic(input);loop.break
+          }
+        }
       }
       session.close()
     }

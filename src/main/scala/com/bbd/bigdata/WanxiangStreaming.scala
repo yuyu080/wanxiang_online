@@ -1,18 +1,23 @@
 package com.bbd.bigdata
 
+import java.text.SimpleDateFormat
 import java.util.Properties
 import java.util.concurrent.TimeUnit
 
 import com.bbd.bigdata.WanxiangSinkToNeo4j.WanxiangSinkToNeo4j
 import com.bbd.bigdata.core.CypherToNeo4j
+import com.bbd.bigdata.util.CommonFunctions
 import org.apache.flink.api.common.restartstrategy.RestartStrategies
 import org.apache.flink.api.common.time.Time
-import org.apache.flink.streaming.api.CheckpointingMode
+import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010
 import org.apache.flink.streaming.util.serialization.SimpleStringSchema
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
+import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor
+import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows
+import org.apache.flink.streaming.api.windowing.windows.TimeWindow
 object WanxiangStreaming {
 
   def main(args: Array[String]) {
@@ -23,6 +28,7 @@ object WanxiangStreaming {
     * */
     //环境参数定义
     val env = StreamExecutionEnvironment.getExecutionEnvironment
+    //env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime)
     val config = env.getCheckpointConfig
     config.enableExternalizedCheckpoints(ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION)
     //env.setStateBackend(new RocksDBStateBackend("hdfs:///checkpoints-data/")
@@ -59,6 +65,37 @@ object WanxiangStreaming {
       //.map(CypherToNeo4j.getCypher(_)._2).filter(_.length>1).addSink(new WanxiangSinkToNeo4j())
       //.map(CypherToNeo4j.getCypher(_)._2).filter(_.length>1).map(process_message(_)).rebalance.writeAsText("/data1/datawarehouse/data/flink_20171214").setParallelism(1)
       .uid("wanxiang_source")
+
+//      .assignTimestampsAndWatermarks(
+//        new BoundedOutOfOrdernessTimestampExtractor[String](org.apache.flink.streaming.api.windowing.time.Time.seconds(3)) {
+//          override def extractTimestamp(t: String): Long = {
+//            try{
+//              val obj = CommonFunctions.jsonToObj(t)
+//              val s = obj.get("canal_time").toString
+//              val timeformat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
+//              val time = timeformat.parse(s).getTime
+//              time
+//            } catch {
+//              case e : Exception => 1420041600000L
+//            }
+//          }
+//        }).uid("timestamp_and_watermark")
+//
+//        .keyBy(input => {
+//          try{
+//            val obj = CommonFunctions.jsonToObj(input)
+//            var key = obj.get("bbd_xgxx_id")
+//            if(key == null){
+//              key = obj.get("bbd_qyxx_id").toString
+//            }
+//            key.toString
+//          } catch {
+//            case e : Exception => "412389d6cc9cd963e7d8cd2df4490222"
+//          }
+//        })
+//        .window(TumblingEventTimeWindows.of(org.apache.flink.streaming.api.windowing.time.Time.seconds(3)))
+//        .apply(new MyKeyWindowFunction[String,String,List[String],TimeWindow]).uid("window_operation")
+
       .addSink(new WanxiangSinkToNeo4j())
       .uid("wanxiang_sink")
 

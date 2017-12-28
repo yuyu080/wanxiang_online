@@ -105,21 +105,24 @@ object app {
     val result6 = CypherToNeo4j.getCypher(json10ed)
     val result8 = CypherToNeo4j.getCypher(json4ed)
     val result10 = CypherToNeo4j.getCypher(json44ed)
+    val sss="""{"bbd_table":"recruit","create_time":"2017-12-28 13:46:41","bbd_qyxx_id":"7e9143911eff4249a06d6726bb8db7dc","canal_table":"xgxx_relation_canal","bbd_xgxx_id":"d3ae49cb8f50fe2011a802567b7b83d2","canal_eventtype":"INSERT","id_type":"0","id":"1467467663","canal_time":"2017/12/28 13:46:42:516"}"""
+    val result110=CypherToNeo4j.getCypher(sss)
+    result110._2.foreach(println)
 
-    for (i <- result7._2) {
-      println(i)
-    }
-
-    for (i <- result8._2) {
-      println(i)
-    }
+//    for (i <- result7._2) {
+//      println(i)
+//    }
+//
+//    for (i <- result8._2) {
+//      println(i)
+//    }
 
     //执行多次
-    val multi_result = Array(
-      result7, result8, result7, result9, result10,
-      result10, result9
-    )
-    multi_result.map(addPerson).foreach(println)
+//    val multi_result = Array(
+//      result7, result8, result7, result9, result10,
+//      result10, result9
+//    )
+//    multi_result.map(addPerson).foreach(println)
 
     //执行一次
 //    println(addPerson(result4))
