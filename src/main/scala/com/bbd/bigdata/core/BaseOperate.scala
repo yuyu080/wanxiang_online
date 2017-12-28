@@ -48,6 +48,8 @@ trait BaseOperate {
     val province_name = getRegionName(province)
     val regcap_amount = info.get("regcap_amount").toString
     val realcap_amount = info.get("realcap_amount").toString
+    val regcap_currency = info.get("regcap_currency").toString
+    val realcap_currency = info.get("realcap_currency").toString
 
     if (event_type == "DELETE") {
       //企业节点不能被直接删除
@@ -79,9 +81,9 @@ trait BaseOperate {
              |SET a.Industry = "${info.get("company_industry").toString}"
              |SET a.company_type = "${info.get("company_companytype").toString.replace(",", "").replace("\"", "")}"
              |SET a.regcap = ${if(regcap_amount == "") "0.0" else regcap_amount}
-             |SET a.regcap_currency  = "${info.get("regcap_currency").toString}"
+             |SET a.regcap_currency  = "${if(regcap_currency == "") "-" else regcap_currency}"
              |SET a.realcap = ${if(realcap_amount == "") "0.0" else realcap_amount}
-             |SET a.realcap_currency = "${info.get("realcap_currency").toString}"
+             |SET a.realcap_currency = "${if(realcap_currency == "") "-" else realcap_currency}"
              |SET a.update_time = timestamp()
          """.stripMargin,
           s"""
