@@ -20,7 +20,7 @@ trait BaseOperate {
       region_properties.load(in)
       region_properties.getProperty(company_county).split("\\|")
     }.recover {
-      case e: Throwable => Array("", "")
+      case e: Throwable => Array("-", "-")
     }.get
 
     //获取地域名称
@@ -30,8 +30,30 @@ trait BaseOperate {
       region_properties.load(in)
       new String(region_properties.getProperty(company_county).getBytes("ISO-8859-1"), "utf-8")
     }.recover {
-      case e: Throwable => ""
+      case e: Throwable => "-"
     }.get
+
+    //获取区市省的名称
+    def getArea(company_county:String) = {
+      val in = getRegionInfo(company_county)
+      if (in(0) != "-" && in(1) != "-") {
+        (getRegionName(company_county), getRegionName(in(0)), getRegionName(in(1)))
+      } else if (in(0) != "-" && in(1) == "-") {
+        ("-", getRegionName(company_county), getRegionName(in(0)))
+      } else {
+        ("-", "-", getRegionName(company_county))
+      }
+    }
+
+    //获得区域ID
+    def getCountyCode(company_county:String) = {
+      val in = getRegionInfo(company_county)
+      if (in(0) != "-" && in(1) != "-") {
+        company_county
+      } else {
+        "-"
+      }
+    }
 
     /*
      *根据操作类型，返回不同的Cypther
@@ -40,12 +62,13 @@ trait BaseOperate {
     val table_name = info.get("canal_table").toString.replace("_canal", "")
     val bbd_qyxx_id = info.get("bbd_qyxx_id").toString
     val event_type = info.get("canal_eventtype").toString
-    val county = info.get("company_county").toString
-    val county_name = getRegionName(county)
-    val city = getRegionInfo(county)(0)
-    val city_name = getRegionName(city)
-    val province = getRegionInfo(county)(1)
-    val province_name = getRegionName(province)
+
+    val area = getArea(info.get("company_county").toString)
+    val county = getCountyCode(info.get("company_county").toString)
+    val county_name = area._1
+    val city_name = area._2
+    val province_name = area._3
+
     val regcap_amount = info.get("regcap_amount").toString
     val realcap_amount = info.get("realcap_amount").toString
     val regcap_currency = info.get("regcap_currency").toString
@@ -144,13 +167,21 @@ trait BaseOperate {
         if(company_property_name != "") {
           s"""
              |MATCH (a:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })-[:${table_name.toUpperCase}]-(b:Company)
-             |SET b.$company_property_name = b.$company_property_name - 1
+             |SET a.update_time = timestamp()
              |SET b.update_time = timestamp()
+             |WITH a,b
+             |MATCH (a)-[:${table_name.toUpperCase}]-(b)
+             |SET b.$company_property_name = b.$company_property_name - 1
+             |DETACH DELETE a
            """.stripMargin
         } else {
           s"""
              |MATCH (a:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })-[:${table_name.toUpperCase}]-(b:Company)
-             |RETURN a
+             |SET a.update_time = timestamp()
+             |SET b.update_time = timestamp()
+             |WITH a,b
+             |MATCH (a)-[:${table_name.toUpperCase}]-(b)
+             |DETACH DELETE a
            """.stripMargin
         }
       }
@@ -158,15 +189,7 @@ trait BaseOperate {
       (
         table_name,
         Array(
-          s"""
-             |MATCH (a:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })-[e1:BELONG]-(b:Entity:Time {time : "$event_time"})
-             |DELETE e1
-           """.stripMargin,
-          change_company_property,
-          s"""
-             |MATCH (a:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })
-             |DETACH DELETE a
-           """.stripMargin
+          change_company_property
         )
       )
     } else if(event_type == "INSERT" | event_type == "UPDATE") {
@@ -178,10 +201,8 @@ trait BaseOperate {
              |ON CREATE SET a.create_time = timestamp()
              |SET a.event_time = $event_timestamp  $event_info
              |SET a.update_time = timestamp()
-         """.stripMargin,
-          s"""
-             |MATCH (a:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })
-             |MERGE (b:Entity:Time {time : "$event_time" })
+             |WITH a
+             |MATCH (b:Entity:Time {time : "$event_time" })
              |MERGE (a)-[e1:BELONG]-(b)
              |ON CREATE SET  e1.create_time = timestamp()
          """.stripMargin
@@ -223,11 +244,15 @@ trait BaseOperate {
             table_name,
             Array(
               s"""
-                 |MATCH (a:Entity:Company {bbd_qyxx_id: "$bbd_qyxx_id" })-[e1:$relation_type]->(b:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })
+                 |MATCH
+                 |(a:Entity:Company {bbd_qyxx_id: "$bbd_qyxx_id" }),
+                 |(b:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })
                  |SET a.update_time = timestamp()
+                 |SET b.update_time = timestamp()
+                 |WITH a,b
+                 |MATCH (a)-[e1:$relation_type]->(b)
                  |SET a.$company_property_name = a.$company_property_name - 1
-                 |WITH e1
-                 |DELETE e1
+                 |DETACH DELETE b
              """.stripMargin
             )
           )
@@ -251,17 +276,16 @@ trait BaseOperate {
                  |MERGE (a:Entity:Company {bbd_qyxx_id: "$bbd_qyxx_id" })
                  |${CommonFunctions.getCompanyProperty("a")}
                  |ON CREATE SET a.create_time = timestamp()
-                 |ON CREATE SET a.update_time = timestamp()
+                 |SET a.update_time = timestamp()
                  |WITH a
                  |MERGE (b:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })
                  |ON CREATE SET b.create_time = timestamp()
-                 |ON CREATE SET b.update_time = timestamp()
+                 |SET b.update_time = timestamp()
                  |WITH a, b
                  |MERGE (a)-[e1:$relation_type]->(b)
                  |ON CREATE SET e1.create_time = timestamp()
                  |ON CREATE SET e1.id_type = ${if(info.get("id_type") == null) 0 else info.get("id_type").toString}
                  |ON CREATE SET a.$company_property_name = a.$company_property_name + 1
-                 |ON CREATE SET a.update_time = timestamp()
              """.stripMargin
             )
           )
@@ -273,11 +297,11 @@ trait BaseOperate {
                  |MERGE (a:Entity:Company {bbd_qyxx_id: "$bbd_qyxx_id" })
                  |${CommonFunctions.getCompanyProperty("a")}
                  |ON CREATE SET a.create_time = timestamp()
-                 |ON CREATE SET a.update_time = timestamp()
+                 |SET a.update_time = timestamp()
                  |WITH a
                  |MERGE (b:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })
                  |ON CREATE SET b.create_time = timestamp()
-                 |ON CREATE SET b.update_time = timestamp()
+                 |SET b.update_time = timestamp()
                  |WITH a, b
                  |MERGE (a)-[e1:$relation_type]->(b)
                  |ON CREATE SET e1.create_time = timestamp()
@@ -342,12 +366,18 @@ trait BaseOperate {
       s"""
          |MATCH
          |(c:Entity:Role:${CommonFunctions.upperCase(args("relation_type").toLowerCase)} {bbd_role_id: "${args("bbd_role_id")}" }),
-         |(b:Entity:Company {bbd_qyxx_id: "${args("destination_id")}" })
-         |SET b.update_time = timestamp() $str_one
+         |(b:Entity:Company {bbd_qyxx_id: "${args("destination_id")}" }),
+         |(a:Entity:${args("source_label")} {bbd_qyxx_id: "${args("source_id")}" })
+         |SET a.update_time = timestamp()
+         |SET b.update_time = timestamp()
+         |SET c.update_time = timestamp()
+         |WITH a,b,c
+         |MATCH (c)-[:${args("relation_type")}]->(b)
+         |$str_one
          |DETACH DELETE c
-         |WITH b
-         |MATCH (a:Entity:${args("source_label")} {bbd_qyxx_id: "${args("source_id")}" })-[:VIRTUAL]-(h:Entity:Role)-[:VIRTUAL]-(b) $str_two
-         |WITH a, b, h
+         |WITH a,b
+         |MATCH (a)-[:VIRTUAL]-(h:Entity:Role)-[:VIRTUAL]-(b) $str_two
+         |WITH a,b,h
          |WHERE NOT exists((a)-[:$role_type]-(:Entity:Role)-[:$role_type]-(b))
          |DETACH DELETE h
        """.stripMargin
@@ -359,10 +389,12 @@ trait BaseOperate {
            |MERGE (a:Entity:Company {bbd_qyxx_id: "${args("source_id")}" })
            |${CommonFunctions.getCompanyProperty("a")}
            |ON CREATE SET a.create_time = timestamp()
+           |SET a.update_time = timestamp()
            |WITH a
            |MERGE (b:Entity:Company {bbd_qyxx_id: "${args("destination_id")}" })
            |${CommonFunctions.getCompanyProperty("b")}
            |ON CREATE SET b.create_time = timestamp()
+           |SET b.update_time = timestamp()
            |WITH a, b """.stripMargin
     } else if(args("source_label") == "Person") {
       step_one =
@@ -376,6 +408,7 @@ trait BaseOperate {
            |MERGE (b:Entity:Company {bbd_qyxx_id: "${args("destination_id")}" })
            |${CommonFunctions.getCompanyProperty("b")}
            |ON CREATE SET b.create_time = timestamp()
+           |SET b.update_time = timestamp()
            |WITH a, b """.stripMargin
     } else {
       return (args("table_name"), Array("MESSAGE_ERROR"))
@@ -426,8 +459,12 @@ trait BaseOperate {
                |(a:Entity:${args("source_label")})-[:${args("relation_type")}]->
                |(c:Entity:Role:${CommonFunctions.upperCase(args("relation_type").toLowerCase)} {bbd_role_id: "${args("bbd_role_id")}" })-[:${args("relation_type")}]->
                |(b:Entity:Company {bbd_qyxx_id: "${args("destination_id")}" })
-               |SET a.dwtzxx = a.dwtzxx - 1
                |SET a.update_time = timestamp()
+               |WITH a,b,c
+               |MATCH (a)-[:INVEST]-(c)-[:INVEST]->(b)
+               |SET a.dwtzxx = a.dwtzxx - 1
+               |SET b.update_time = timestamp()
+               |SET c.update_time = timestamp()
              """.stripMargin,
             get_delete(
               "SET b.gdxx = b.gdxx - 1",
