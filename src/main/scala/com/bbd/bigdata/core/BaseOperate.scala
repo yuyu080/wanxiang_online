@@ -201,10 +201,8 @@ trait BaseOperate {
              |ON CREATE SET a.create_time = timestamp()
              |SET a.event_time = $event_timestamp  $event_info
              |SET a.update_time = timestamp()
-         """.stripMargin,
-          s"""
-             |MATCH (a:Entity:Event:$event_label {bbd_event_id: "$bbd_xgxx_id" })
-             |MERGE (b:Entity:Time {time : "$event_time" })
+             |WITH a
+             |MATCH (b:Entity:Time {time : "$event_time" })
              |MERGE (a)-[e1:BELONG]-(b)
              |ON CREATE SET  e1.create_time = timestamp()
          """.stripMargin
