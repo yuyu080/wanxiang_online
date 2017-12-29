@@ -71,6 +71,7 @@ object WanxiangSinkToNeo4j {
         }
       }
       var tuple_cypher_message = (table_name,final_list.toArray)
+      if(final_list.toArray.length>6) Thread.sleep(300)
       if(tuple_cypher_message._2.contains("MESSAGE_ERROR")){
         tuple_cypher_message = (table_name, Array("MESSAGE_ERROR"))
       }
