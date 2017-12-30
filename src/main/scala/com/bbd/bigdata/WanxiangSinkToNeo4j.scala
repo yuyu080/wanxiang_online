@@ -19,6 +19,8 @@ import scala.util.Random
 import com.alibaba.fastjson._
 import scala.util.control._
 
+import org.apache.log4j.Logger
+
 
 object WanxiangSinkToNeo4j {
 
@@ -52,6 +54,12 @@ object WanxiangSinkToNeo4j {
         * in 输入的数据
         * Exception processing
         */
+      val thread_id = Thread.currentThread().getId
+      //val logger = Logger.getLogger(WanxiangSinkToNeo4j.getClass)
+      //logger.info(thread_id + " : " + System.currentTimeMillis() + " : " + input)
+
+      println(thread_id + " : " + System.currentTimeMillis() + " : " + input)
+
       val session = driver.session()
       var table_name = ""
       val final_list = scala.collection.mutable.ListBuffer[String]()
@@ -71,6 +79,7 @@ object WanxiangSinkToNeo4j {
         }
       }
       var tuple_cypher_message = (table_name,final_list.toArray)
+      if(final_list.toArray.length>6) Thread.sleep(300)
       if(tuple_cypher_message._2.contains("MESSAGE_ERROR")){
         tuple_cypher_message = (table_name, Array("MESSAGE_ERROR"))
       }
