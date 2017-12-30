@@ -15,8 +15,9 @@ object CompositeOperate extends BaseOperate {
     val source_id = info.get("frname_id").toString
     val source_name = info.get("frname").toString
     val relation_type = "LEGAL"
+    val role_name = ""
     val destination_id = info.get("bbd_qyxx_id").toString
-    val bbd_role_id = CommonFunctions.md5(source_name + destination_id + relation_type)
+    val bbd_role_id = CommonFunctions.md5(source_name + destination_id + relation_type + role_name)
     val bbd_isinvest_role_id = CommonFunctions.md5(source_name + destination_id + "Isinvest")
 
     val args = Map(
@@ -31,7 +32,7 @@ object CompositeOperate extends BaseOperate {
       "relation_type" -> relation_type,
       "destination_id" -> destination_id,
       "bbd_role_id" -> bbd_role_id,
-      "role_name" -> "法定代表人",
+      "role_name" -> role_name,
       "bbd_isinvest_role_id" -> bbd_isinvest_role_id
     )
 
@@ -50,8 +51,9 @@ object CompositeOperate extends BaseOperate {
     val source_id = info.get("shareholder_id").toString
     val source_name = info.get("shareholder_name").toString
     val relation_type = "INVEST"
+    val role_name = info.get("shareholder_type").toString
     val destination_id = info.get("bbd_qyxx_id").toString
-    val bbd_role_id = CommonFunctions.md5(source_name + destination_id + relation_type)
+    val bbd_role_id = CommonFunctions.md5(source_name + destination_id + relation_type + role_name)
     val bbd_isinvest_role_id = CommonFunctions.md5(source_name + destination_id + "Isinvest")
 
     val args = Map(
@@ -66,7 +68,7 @@ object CompositeOperate extends BaseOperate {
       "relation_type" -> relation_type,
       "destination_id" -> destination_id,
       "bbd_role_id" -> bbd_role_id,
-      "role_name" -> info.get("shareholder_type").toString,
+      "role_name" -> role_name,
       "bbd_isinvest_role_id" -> bbd_isinvest_role_id,
       "ratio" -> info.get("invest_ratio").toString
     )
@@ -78,8 +80,9 @@ object CompositeOperate extends BaseOperate {
     val source_id = info.get("name_id").toString
     val source_name = info.get("name").toString
     val relation_type = info.get("type").toString.toUpperCase
+    val role_name = info.get("position").toString
     val destination_id = info.get("bbd_qyxx_id").toString
-    val bbd_role_id = CommonFunctions.md5(source_name + destination_id + relation_type)
+    val bbd_role_id = CommonFunctions.md5(source_name + destination_id + relation_type + role_name)
     val bbd_isinvest_role_id = CommonFunctions.md5(source_name + destination_id + "Isinvest")
 
     val args = Map(
@@ -91,7 +94,7 @@ object CompositeOperate extends BaseOperate {
       "relation_type" -> relation_type,
       "destination_id" -> destination_id,
       "bbd_role_id" -> bbd_role_id,
-      "role_name" -> info.get("position").toString,
+      "role_name" -> role_name,
       "bbd_isinvest_role_id" -> bbd_isinvest_role_id
     )
 
@@ -102,8 +105,9 @@ object CompositeOperate extends BaseOperate {
     val source_id = info.get("bbd_branch_id").toString
     val source_name = info.get("name").toString
     val relation_type = "BRANCH"
+    val role_name = "分支机构"
     val destination_id = info.get("bbd_qyxx_id").toString
-    val bbd_role_id = CommonFunctions.md5(source_name + destination_id + relation_type)
+    val bbd_role_id = CommonFunctions.md5(source_name + destination_id + relation_type + role_name)
     val bbd_isinvest_role_id = CommonFunctions.md5(source_name + destination_id + "Isinvest")
 
     val args = Map(
@@ -115,7 +119,7 @@ object CompositeOperate extends BaseOperate {
       "relation_type" -> relation_type,
       "destination_id" -> destination_id,
       "bbd_role_id" -> bbd_role_id,
-      "role_name" -> "分支机构",
+      "role_name" -> role_name,
       "bbd_isinvest_role_id" -> bbd_isinvest_role_id
     )
 
