@@ -96,10 +96,20 @@ object WanxiangStreaming {
 //        .window(TumblingEventTimeWindows.of(org.apache.flink.streaming.api.windowing.time.Time.seconds(3)))
 //        .apply(new MyKeyWindowFunction[String,String,List[String],TimeWindow]).uid("window_operation")
 
+        .keyBy(input =>{
+      val qyxx_id_pattern = """(?<=bbd_qyxx_id":")(.*?)(?=")""".r
+      val qyxx_id = qyxx_id_pattern.findFirstIn(input).getOrElse("412389d6cc9cd963e7d8cd2df4490222")
+      qyxx_id
+    }
+    ).uid("key by bbd_qyxx_id")
+
       .addSink(new WanxiangSinkToNeo4j())
       .uid("wanxiang_sink")
 
+
+
     env.execute("Wanxiang streaming data processing to neo4j7")
+    //print(env.getExecutionPlan)
 
   }
 
