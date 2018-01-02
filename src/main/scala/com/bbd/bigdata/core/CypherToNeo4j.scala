@@ -64,16 +64,6 @@ object CypherToNeo4j {
         case "qyxg_debet_canal" => qyxgDebet(obj)
         case "qyxx_nb_jbxx_canal" => qyxxNbJbxx(obj)
 
-        case "qyxx_nb_gzsm_canal" => qyxxNbGzsm(obj)
-        case "qyxx_nb_czxx_canal" => qyxxNbCzxx(obj)
-        case "qyxx_nb_wzxx_canal" => qyxxNbWzxx(obj)
-        case "qyxx_nb_fzjg_canal" => qyxxNbFzjg(obj)
-        case "qyxx_nb_tzxx_canal" => qyxxNbTzxx(obj)
-        case "qyxx_nb_zcxx_canal" => qyxxNbZcxx(obj)
-        case "qyxx_nb_dbxx_canal" => qyxxNbDbxx(obj)
-        case "qyxx_nb_xgxx_canal" => qyxxNbXgxx(obj)
-        case "qyxx_nb_xzxk_canal" => qyxxNbXzxk(obj)
-        case "qyxx_nb_bgxx_canal" => qyxxNbBgxx(obj)
         case "black_list_canal" => blackList(obj)
         case _ => (table_name, Array("MESSAGE_ERROR"))
       }

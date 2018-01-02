@@ -468,45 +468,6 @@ object CompositeOperate extends BaseOperate {
     operateEventNode(info)
   }
 
-  def qyxxNbGzsm(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    operateEventNode(info)
-  }
-
-  def qyxxNbCzxx(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    operateEventNode(info)
-  }
-
-  def qyxxNbWzxx(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    operateEventNode(info)
-  }
-
-  def qyxxNbFzjg(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    operateEventNode(info)
-  }
-
-  def qyxxNbTzxx(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    operateEventNode(info)
-  }
-
-  def qyxxNbZcxx(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    operateEventNode(info)
-  }
-
-  def qyxxNbDbxx(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    operateEventNode(info)
-  }
-
-  def qyxxNbXgxx(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    operateEventNode(info)
-  }
-
-  def qyxxNbXzxk(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    operateEventNode(info)
-  }
-
-  def qyxxNbBgxx(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
-    operateEventNode(info)
-  }
   def blackList(info:com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
     val bbd_qyxx_id = info.get("bbd_qyxx_id").toString
     ("black_list", Array("SINK_TO_REDIS",bbd_qyxx_id))
