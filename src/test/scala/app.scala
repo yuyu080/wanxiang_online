@@ -2,10 +2,15 @@
   * Created by Administrator on 2017/9/10.
   */
 
+import java.util.Properties
 import java.util.concurrent.TimeUnit._
 
 import com.bbd.bigdata.core.CypherToNeo4j
+import com.bbd.bigdata.redisCli.RedisClient
 import org.neo4j.driver.v1.{Config, _}
+
+import scala.util.Try
+import scala.util.control.Breaks
 
 
 object app {
@@ -37,10 +42,10 @@ object app {
 
     //    println(CommonFunctions.md5("zhaoyunfeng"))
     val json =
-      """{"esdate": "2017-06-30","openfrom":"","company_type":"个体工商户","operating_period":"","opento":"","regcap_amount":"","type":"浙江","company_province":"浙江","bbd_qyxx_id":"2288aafc5f9d4d058d3c5eb19f4c220a","credit_code":"92330203MA2927PF0H","cancel_date":"","regorg":"宁波市海曙区场监督管理局","id":"","investcap_currency":"","realcap":"","bbd_type":"zhejiang","canal_time":"2017/09/26 10:51:07","company_companytype":"9300","regno":"","approval_date":"2017-06-30","create_time":"2017-09-22 15:29:41","frname_id":"4821cc091d267e367be424b514ab98db","regcapcur":"","bbd_history_name":"[]","company_name":"宁波市海曙古林酒肆烧烤店","ipo_company":"","canal_eventtype":"INSERT","operate_scope":"餐饮服务。（法须经批准的项目，经相关部门批准后方可开展经营活动）","revoke_date":"","realcap_amount":"3443.4","frname_compid":"0","canal_table":"qyxx_basic_canal","regno_or_creditcode":"92330203MA2927PF0H","parent_firm":"","company_enterprise_status":"存续","company_currency":"","bbd_uptime":"1506065217","frname":"牛威龙","address":"浙江省宁波市海曙区古林镇俞家村南街315号","investcap_amount":"","regcap_currency":"","enterprise_status":"存续","company_county":"530324","company_industry":"H","form":"个人经营","regcap":"","company_regorg":"330201","invest_cap":"","bbd_dotime":"2017-09-22","realcap_currency":""}"""
+      """{"esdate": "2017-06-30","openfrom":"","company_type":"个体工商户","operating_period":"","opento":"","regcap_amount":"","type":"浙江","company_province":"浙江","bbd_qyxx_id":"2288aafc5f9d4d058d3c5eb19f4c220a","credit_code":"92330203MA2927PF0H","cancel_date":"","regorg":"宁波市海曙区场监督管理局","id":"","investcap_currency":"","realcap":"","bbd_type":"zhejiang","canal_time":"2017/09/26 10:51:07","company_companytype":"9300","regno":"","approval_date":"2017-06-30","create_time":"2017-09-22 15:29:41","frname_id":"4821cc091d267e367be424b514ab98db","regcapcur":"","bbd_history_name":"[]","company_name":"宁波市海曙古林酒肆烧烤店","ipo_company":"","canal_eventtype":"INSERT","operate_scope":"餐饮服务。（法须经批准的项目，经相关部门批准后方可开展经营活动）","revoke_date":"","realcap_amount":"3443.4","frname_compid":"0","canal_table":"qyxx_basic_canal","regno_or_creditcode":"92330203MA2927PF0H","parent_firm":"","company_enterprise_status":"存续","company_currency":"","bbd_uptime":"1506065217","frname":"牛威龙","address":"浙江省宁波市海曙区古林镇俞家村南街315号","investcap_amount":"","regcap_currency":"","enterprise_status":"存续","company_county":"2305300","company_industry":"H","form":"个人经营","regcap":"","company_regorg":"330201","invest_cap":"","bbd_dotime":"2017-09-22","realcap_currency":""}"""
     val dejson =
       """{"esdate": "2017-06-30","openfrom":"","company_type":"个体工商户","operating_period":"","opento":"","regcap_amount":"","type":"浙江","company_province":"浙江","bbd_qyxx_id":"2288aafc5f9d4d058d3c5eb19f4c220a","credit_code":"92330203MA2927PF0H","cancel_date":"","regorg":"宁波市海曙区场监督管理局","id":"","investcap_currency":"","realcap":"","bbd_type":"zhejiang","canal_time":"2017/09/26 10:51:07","company_companytype":"9300","regno":"","approval_date":"2017-06-30","create_time":"2017-09-22 15:29:41","frname_id":"4821cc091d267e367be424b514ab98db","regcapcur":"","bbd_history_name":"[]","company_name":"宁波市海曙古林酒肆烧烤店","ipo_company":"","canal_eventtype":"DELETE","operate_scope":"餐饮服务。（法须经批准的项目，经相关部门批准后方可开展经营活动）","revoke_date":"","realcap_amount":"3443.4","frname_compid":"0","canal_table":"qyxx_basic_canal","regno_or_creditcode":"92330203MA2927PF0H","parent_firm":"","company_enterprise_status":"存续","company_currency":"","bbd_uptime":"1506065217","frname":"牛威龙","address":"浙江省宁波市海曙区古林镇俞家村南街315号","investcap_amount":"","regcap_currency":"","enterprise_status":"存续","company_county":"530324","company_industry":"H","form":"个人经营","regcap":"","company_regorg":"330201","invest_cap":"","bbd_dotime":"2017-09-22","realcap_currency":""}"""
-
+    val json23 = """{\"esdate\":\"2012-03-07\",\"openfrom\":\"\",\"company_type\":\"个体工商户\",\"operating_period\":\"\",\"opento\":\"\",\"regcap_amount\":\"\",\"type\":\"江苏\",\"company_province\":\"江苏\",\"bbd_qyxx_id\":\"cf4fc6334ea346f4b6bee41c8a70da0f\",\"credit_code\":\"\",\"cancel_date\":\"2015-06-27\",\"regorg\":\"徐州市鼓楼区市场监督管理局\",\"id\":\"\",\"investcap_currency\":\"\",\"realcap\":\"\",\"bbd_type\":\"jiangsu\",\"canal_time\":\"2017/12/28 19:53:21:154\",\"company_companytype\":\"9300\",\"regno\":\"320302600141142\",\"approval_date\":\"2015-06-27\",\"create_time\":\"2017-12-28 19:53:20\",\"frname_id\":\"b78b2bb5fc048fb7579db6b464672a59\",\"regcapcur\":\"\",\"bbd_history_name\":\"[]\",\"company_name\":\"徐州市鼓楼区渊博食品店\",\"ipo_company\":\"\",\"canal_eventtype\":\"INSERT\",\"operate_scope\":\"预包装食品兼散装食品、乳制品（含婴幼儿配方乳粉）、儿童服装、饰品零售。\",\"revoke_date\":\"\",\"realcap_amount\":\"\",\"frname_compid\":\"1\",\"canal_table\":\"qyxx_basic_canal\",\"regno_or_creditcode\":\"320302600141142\",\"parent_firm\":\"\",\"company_enterprise_status\":\"注销\",\"company_currency\":\"\",\"bbd_uptime\":\"1514461834\",\"frname\":\"顾志莉\",\"address\":\"徐州市清水湾F01\\\\F02门面房2单元106室\",\"investcap_amount\":\"\",\"regcap_currency\":\"\",\"enterprise_status\":\"注销\",\"company_county\":\"320302\",\"company_industry\":\"F\",\"form\":\"个人经营\",\"regcap\":\"\",\"company_regorg\":\"320301\",\"invest_cap\":\"\",\"bbd_dotime\":\"2017-12-28\",\"realcap_currency\":\"\"}"""
 
     val json2 = """{"esdate":"2017-09-15","openfrom":"2017-09-15","company_type":"有限责任公司（自然人投资或控股）","operating_period":"","opento":"2027-09-14","regcap_amount":"2000000.0","type":"上海","company_province":"上海","bbd_qyxx_id":"417edb413bfe44bbbcb477a3bfc03d54","credit_code":"91310116MA1J9WY5X8","cancel_date":"","regorg":"金山区市场监管局","id":"","investcap_currency":"","realcap":"","bbd_type":"shanghai","canal_time":"2017/10/11 13:50:53","company_companytype":"1130","regno":"","approval_date":"2017-09-15","create_time":"2017-10-10 19:16:23","frname_id":"dd15f8b1887f000f079155e16b037561","regcapcur":"","bbd_history_name":"[]","company_name":"上海璨晔文化传播有限公司","ipo_company":"","canal_eventtype":"INSERT","operate_scope":"文化艺术交流策划咨询，商务咨询，企业管理咨询，公关活动策划，计算机网络工程，办公文化用品，电子产品，计算机、软件及辅助设备销售，动漫设计，从事网络科技专业领域内技术开发技术转让、技术咨询、技术服务。【依法须经批准的项目，经相关部门批准后方可开展经营活动】","revoke_date":"","realcap_amount":"","frname_compid":"1","canal_table":"qyxx_basic_canal","regno_or_creditcode":"","parent_firm":"","company_enterprise_status":"存续","company_currency":"人民币","bbd_uptime":"1507628644","frname":"武晔","address":"上海市金山区金山卫镇秋实路688号1号楼5单元304室D座","investcap_amount":"","regcap_currency":"人民币","enterprise_status":"存续（在营,开业、在册）","company_county":"310116","company_industry":"R","form":"","regcap":"200万人民币","company_regorg":"310012","invest_cap":"","bbd_dotime":"2017-10-10","realcap_currency":""}"""
     val json3 = """{"comment_num":"","news_site":"中国财经信息网","canal_table":"qyxg_yuqing_canal","main":"","plate":"","table_name":"","bbd_source":"百度新闻","rowkey":"","id":"50880614","keyword":"","bbd_type":"qyxg_yuqing_baidu_news","canal_time":"2017/10/11 14:26:13","bbd_uptime":"1507543283","bbd_url":"http://www.cfi.net.cn/p20160326000415.html","pubdate":"2017-07-21","total_news":"8","ipgp":"","search_key":"贵州燃气集团股份有限公司","create_time":"2017-10-09 18:03:41","bbd_xgxx_id":"c4b349d9f365d7c423dc8ed196072aca","author":"","abstract":"及相关法律、法规、规范性文件编写本报书。 二、本信息披露义务人签署本报告书已获得必要的授权和批准,其履行亦不 违反信息披露义务人章程或内部规则中的任何条款...","click_num":"","picture":"","news_num":"0","transfer_num":"","canal_eventtype":"INSERT","news_title":"...报告书(刘江、和泓置地集团有限公司、贵州燃气集团股份有限公司)","_id":"","bbd_dotime":"2017-10-09","status":""}"""
@@ -95,34 +100,105 @@ object app {
 
     //插入
     val result = CypherToNeo4j.getCypher(json5) //cf20d42646814390adda48367d71bbc6
-    val result3 = CypherToNeo4j.getCypher(json55) //zyfcf20d42646814390adda48367d71bbc6
-    val result5 = CypherToNeo4j.getCypher(json10)
-    val result7 = CypherToNeo4j.getCypher(json4)
-    val result9 = CypherToNeo4j.getCypher(json44)
+    val result3 = CypherToNeo4j.getCypher(json10) //zyfcf20d42646814390adda48367d71bbc6
+    val result5 = CypherToNeo4j.getCypher(json16)
+    val result7 = CypherToNeo4j.getCypher(json9)
+    val result9 = CypherToNeo4j.getCypher(json12)
     //删除
     val result2 = CypherToNeo4j.getCypher(json5de) //cf20d42646814390adda48367d71bbc6
-    val result4 = CypherToNeo4j.getCypher(json55de) //zyfcf20d42646814390adda48367d71bbc6
-    val result6 = CypherToNeo4j.getCypher(json10ed)
+    val result4 = CypherToNeo4j.getCypher(json10ed) //zyfcf20d42646814390adda48367d71bbc6
+    val result6 = CypherToNeo4j.getCypher(json16de)
     val result8 = CypherToNeo4j.getCypher(json4ed)
     val result10 = CypherToNeo4j.getCypher(json44ed)
-    val sss="""{"bbd_table":"recruit","create_time":"2017-12-28 13:46:41","bbd_qyxx_id":"7e9143911eff4249a06d6726bb8db7dc","canal_table":"xgxx_relation_canal","bbd_xgxx_id":"d3ae49cb8f50fe2011a802567b7b83d2","canal_eventtype":"INSERT","id_type":"0","id":"1467467663","canal_time":"2017/12/28 13:46:42:516"}"""
-    val result110=CypherToNeo4j.getCypher(sss)
-    result110._2.foreach(println)
-
+////
 //    for (i <- result7._2) {
 //      println(i)
 //    }
-//
-//    for (i <- result8._2) {
-//      println(i)
-//    }
-
-    //执行多次
+////
+////    for (i <- result8._2) {
+////      println(i)
+////    }
+////
+////    //执行多次
 //    val multi_result = Array(
-//      result7, result8, result7, result9, result10,
-//      result10, result9
+//      result7
 //    )
-//    multi_result.map(addPerson).foreach(println)
+//
+    //multi_result.map(addPerson).foreach(println)
+
+    def doSomething() = {
+      Thread.sleep(3000)
+    }
+
+    val jedis = RedisClient.pool.getResource
+    val bbd_qyxx_id = "1223421354r3425r34"
+    val redis_result_0 = jedis.get(bbd_qyxx_id)
+
+    if (redis_result_0 == 1) {
+      doSomething()
+    } else {
+      val loop = new Breaks
+      loop.breakable {
+        while (true) {
+          val redis_result = jedis.set(bbd_qyxx_id +"_lock", "0", "NX", "PX", 20000)
+          if (redis_result == "OK") {
+            doSomething()
+            jedis.set(bbd_qyxx_id, "1")
+            jedis.del(bbd_qyxx_id +"_lock")
+            loop.break()
+          }
+          Thread.sleep(50)
+        }
+      }
+  }
+
+
+
+
+
+
+
+
+//    //根据公司的区域编码，获取相应的省市区编码
+//    def getRegionInfo(company_county:String): Array[String] = Try {
+//      val region_properties = new Properties()
+//      val in = this.getClass.getClassLoader.getResourceAsStream("region_map.properties")
+//      region_properties.load(in)
+//      region_properties.getProperty(company_county).split("\\|")
+//    }.recover {
+//      case e: Throwable => Array("-", "-")
+//    }.get
+//
+//    //获取地域名称
+//    def getRegionName(company_county:String): String = Try {
+//      val region_properties = new Properties()
+//      val in = this.getClass.getClassLoader.getResourceAsStream("region_name.properties")
+//      region_properties.load(in)
+//      new String(region_properties.getProperty(company_county).getBytes("ISO-8859-1"), "utf-8")
+//    }.recover {
+//      case e: Throwable => "-"
+//    }.get
+//
+//    val county_name = getRegionName("321000")
+////    val city = getRegionInfo("321000")(0)
+////    val city_name = getRegionName(city)
+////    val province = getRegionInfo("321000")(1)
+////    val province_name = getRegionName(province)
+//
+//    def getArea(company_county:String) = {
+//      val in = getRegionInfo(company_county)
+//      if (in(0) != "-" && in(1) != "-") {
+//        (getRegionName(company_county), getRegionName(in(0)), getRegionName(in(1)))
+//      } else if (in(0) != "-" && in(1) == "-") {
+//        ("-", getRegionName(company_county), getRegionName(in(0)))
+//      } else {
+//        ("-", "-", getRegionName(company_county))
+//      }
+//    }
+//
+//    val s = getArea("350000")
+//    println(s._1,s._2,s._3)
+
 
     //执行一次
 //    println(addPerson(result4))
