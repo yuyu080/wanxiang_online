@@ -1,5 +1,6 @@
 package com.bbd.bigdata
 
+import java.net.{Inet4Address, InetAddress}
 import java.util.concurrent.TimeUnit
 
 import org.apache.flink.configuration.Configuration
@@ -17,8 +18,8 @@ import org.neo4j.driver.v1.exceptions.{ClientException, DatabaseException, Trans
 
 import scala.util.Random
 import com.alibaba.fastjson._
-import scala.util.control._
 
+import scala.util.control._
 import org.apache.log4j.Logger
 
 
@@ -55,10 +56,13 @@ object WanxiangSinkToNeo4j {
         * Exception processing
         */
       val thread_id = Thread.currentThread().getId
+      val addr = InetAddress.getLocalHost
+      val machine_ip = addr.getHostAddress
+
       //val logger = Logger.getLogger(WanxiangSinkToNeo4j.getClass)
       //logger.info(thread_id + " : " + System.currentTimeMillis() + " : " + input)
 
-      println(thread_id + " : " + System.currentTimeMillis() + " : " + input)
+      println(machine_ip + " : " + thread_id + " : " + System.currentTimeMillis() + " : " + input)
 
       val session = driver.session()
       var table_name = ""
