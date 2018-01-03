@@ -96,13 +96,13 @@ trait BaseOperate {
              |SET a.is_ipo = ${if(info.get("ipo_company") == "") "false" else "true"}
              |SET a.name = "${info.get("company_name").toString}"
              |SET a.esdate = "${info.get("esdate").toString}"
-             |SET a.address = "${info.get("address").toString.replace(",", "").replace("\"", "")}"
+             |SET a.address = "${info.get("address").toString.replace(",", "，").replace("\"", "")}"
              |SET a.estatus = "${info.get("company_enterprise_status").toString.replace(",", "，")}"
              |SET a.province = "$province_name"
              |SET a.city = "$city_name"
              |SET a.county = "$county_name"
              |SET a.company_industry = "${info.get("company_industry").toString}"
-             |SET a.company_type = "${info.get("company_companytype").toString.replace(",", "").replace("\"", "")}"
+             |SET a.company_type = "${info.get("company_companytype").toString.replace(",", "，").replace("\"", "")}"
              |SET a.regcap_amount = ${if(regcap_amount == "") "0.0" else regcap_amount}
              |SET a.regcap_currency  = "${if(regcap_currency == "") "-" else regcap_currency}"
              |SET a.realcap_amount = ${if(realcap_amount == "") "0.0" else realcap_amount}
