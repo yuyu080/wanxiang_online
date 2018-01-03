@@ -61,10 +61,11 @@ object WanxiangStreaming {
     //添加source
     val streamingMessages = env.addSource(
       //wanxiang_canal_20170919
-      new FlinkKafkaConsumer010[String](topic, new SimpleStringSchema(), kafkaProps)).startNewChain()
+      new FlinkKafkaConsumer010[String](topic, new SimpleStringSchema(), kafkaProps))//.startNewChain()
       //.map(CypherToNeo4j.getCypher(_)._2).filter(_.length>1).addSink(new WanxiangSinkToNeo4j())
       //.map(CypherToNeo4j.getCypher(_)._2).filter(_.length>1).map(process_message(_)).rebalance.writeAsText("/data1/datawarehouse/data/flink_20171214").setParallelism(1)
-      .uid("wanxiang_source").startNewChain()
+      .uid("wanxiang_source")
+      //.startNewChain()
 
 //      .assignTimestampsAndWatermarks(
 //        new BoundedOutOfOrdernessTimestampExtractor[String](org.apache.flink.streaming.api.windowing.time.Time.seconds(3)) {
@@ -101,7 +102,7 @@ object WanxiangStreaming {
       val qyxx_id = qyxx_id_pattern.findFirstIn(input).getOrElse("412389d6cc9cd963e7d8cd2df4490222")
       qyxx_id
     }
-    ).uid("key by bbd_qyxx_id")
+    )
 
       .addSink(new WanxiangSinkToNeo4j())
       .uid("wanxiang_sink")
