@@ -100,7 +100,7 @@ object WanxiangStreaming {
 //        .apply(new MyKeyWindowFunction[String,String,List[String],TimeWindow]).uid("window_operation")
 
         .keyBy(input =>{
-      val qyxx_id_pattern = """(?<=bbd_qyxx_id":")(.*?)(?=")""".r
+      val qyxx_id_pattern = """(?<=bbd_qyxx_id\\":\\")(.*?)(?=\\")""".r
       val qyxx_id = qyxx_id_pattern.findFirstIn(input).getOrElse(java.util.UUID.randomUUID().toString.trim.replaceAll("-",""))
       qyxx_id
     }
