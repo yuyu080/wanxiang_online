@@ -111,8 +111,8 @@ object WanxiangStreaming {
 
 
 
-    //env.execute("Wanxiang streaming data processing to neo4j7")
-    print(env.getExecutionPlan)
+    env.execute("Wanxiang streaming data processing to neo4j7")
+    //print(env.getExecutionPlan)
 
   }
 
