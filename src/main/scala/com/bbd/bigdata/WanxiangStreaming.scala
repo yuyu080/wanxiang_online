@@ -40,7 +40,7 @@ object WanxiangStreaming {
     env.getCheckpointConfig.setMinPauseBetweenCheckpoints(1000)
     env.getCheckpointConfig.setMaxConcurrentCheckpoints(1)
     env.setRestartStrategy(RestartStrategies.fixedDelayRestart(3,Time.of(10,TimeUnit.SECONDS)))
-    //env.setStateBackend(new FsStateBackend("hdfs:///user/wanxiangstream/checkpoints"))
+    env.setStateBackend(new FsStateBackend("hdfs:///user/wanxiangstream/checkpoints"))
     //flink exactly_once
     env.getCheckpointConfig.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE)
     val params = ParameterTool.fromArgs(args)
