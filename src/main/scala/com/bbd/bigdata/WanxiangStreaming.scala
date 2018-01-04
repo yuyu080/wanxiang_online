@@ -14,6 +14,7 @@ import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010
 import org.apache.flink.streaming.util.serialization.SimpleStringSchema
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.api.java.utils.ParameterTool
+import org.apache.flink.runtime.state.filesystem.FsStateBackend
 import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
 import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows
@@ -33,12 +34,13 @@ object WanxiangStreaming {
     config.enableExternalizedCheckpoints(ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION)
     //env.setStateBackend(new RocksDBStateBackend("hdfs:///checkpoints-data/")
 
-    //minimize latency
-    env.setBufferTimeout(5)
-    env.enableCheckpointing(10*60*1000)
+    //maximize throughput
+    env.setBufferTimeout(-1)
+    env.enableCheckpointing(15*60*1000)
     env.getCheckpointConfig.setMinPauseBetweenCheckpoints(1000)
     env.getCheckpointConfig.setMaxConcurrentCheckpoints(1)
     env.setRestartStrategy(RestartStrategies.fixedDelayRestart(3,Time.of(10,TimeUnit.SECONDS)))
+    //env.setStateBackend(new FsStateBackend("hdfs:///user/wanxiangstream/checkpoints"))
     //flink exactly_once
     env.getCheckpointConfig.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE)
     val params = ParameterTool.fromArgs(args)
@@ -99,7 +101,7 @@ object WanxiangStreaming {
 
         .keyBy(input =>{
       val qyxx_id_pattern = """(?<=bbd_qyxx_id":")(.*?)(?=")""".r
-      val qyxx_id = qyxx_id_pattern.findFirstIn(input).getOrElse("412389d6cc9cd963e7d8cd2df4490222")
+      val qyxx_id = qyxx_id_pattern.findFirstIn(input).getOrElse(java.util.UUID.randomUUID().toString.trim.replaceAll("-",""))
       qyxx_id
     }
     )
@@ -109,8 +111,8 @@ object WanxiangStreaming {
 
 
 
-    env.execute("Wanxiang streaming data processing to neo4j7")
-    //print(env.getExecutionPlan)
+    //env.execute("Wanxiang streaming data processing to neo4j7")
+    print(env.getExecutionPlan)
 
   }
 
