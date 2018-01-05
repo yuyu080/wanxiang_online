@@ -7,7 +7,7 @@ import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction
 import org.neo4j.driver.v1._
 import org.neo4j.driver.v1.Config
-import com.bbd.bigdata.core.CypherToNeo4j
+import com.bbd.bigdata.core.{CypherToNeo4j, DeleteOperate}
 import java.util.{Date, Properties}
 
 import kafka.producer.ProducerConfig
@@ -55,18 +55,32 @@ object WanxiangSinkToNeo4j {
         * in 输入的数据
         * Exception processing
         */
+      //打印taskmanager的ip、线程号、时间戳和接收到的数据
       val thread_id = Thread.currentThread().getId
       val addr = InetAddress.getLocalHost
       val machine_ip = addr.getHostAddress
-
-      //val logger = Logger.getLogger(WanxiangSinkToNeo4j.getClass)
-      //logger.info(thread_id + " : " + System.currentTimeMillis() + " : " + input)
-
       println(machine_ip + " : " + thread_id + " : " + System.currentTimeMillis() + " : " + input)
 
       val session = driver.session()
       var table_name = ""
       val final_list = scala.collection.mutable.ListBuffer[String]()
+
+      //所有事物执行前先根据表名进行删除操作
+      val deleteOp = {
+        val qyxx_id_pattern = """(?<=bbd_qyxx_id\\":\\")(.*?)(?=\\")""".r
+        val qyxx_id = qyxx_id_pattern.findFirstIn(input).getOrElse("")
+        if(input.contains("qyxx_baxx_canal")){
+          DeleteOperate.clearBaxx(qyxx_id)
+        }else if(input.contains("qyxx_gdxx_canal")){
+          DeleteOperate.clearGdxx(qyxx_id)
+        }else if(input.contains("qyxx_basic_canal")){
+          DeleteOperate.clearBasic(qyxx_id)
+        }else{
+          ""
+        }
+      }
+      final_list += deleteOp
+
       var i = 0
       var str = "messageId_"+i
       val obj = JSON.parseObject(input)
@@ -82,6 +96,7 @@ object WanxiangSinkToNeo4j {
           final_list += it.next()
         }
       }
+
       var tuple_cypher_message = (table_name,final_list.toArray)
       if(final_list.toArray.length>6) Thread.sleep(300)
       if(tuple_cypher_message._2.contains("MESSAGE_ERROR")){
