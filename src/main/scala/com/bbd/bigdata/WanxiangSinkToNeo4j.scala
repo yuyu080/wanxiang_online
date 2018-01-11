@@ -81,7 +81,9 @@ object WanxiangSinkToNeo4j {
       }
 
       for (item <- deleteOp) {
-        final_list += item
+        if (item != "") {
+          final_list += item
+        }
       }
 
       var i = 0
