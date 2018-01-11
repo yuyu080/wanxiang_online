@@ -61,7 +61,7 @@ object CompositeOperate extends BaseOperate {
       "event_type" -> info.get("canal_eventtype").toString,
       "source_label" -> {
         val name_compid = info.get("name_compid").toString
-        if (name_compid == "0") "Company" else if (name_compid == "1") "Person" else ""
+        if (name_compid == "0" || name_compid == "3") "Company" else if (name_compid == "1") "Person" else ""
       },
       "source_id" -> source_id,
       "source_name" -> source_name,
