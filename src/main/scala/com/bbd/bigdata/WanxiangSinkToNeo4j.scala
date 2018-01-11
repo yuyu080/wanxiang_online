@@ -76,10 +76,13 @@ object WanxiangSinkToNeo4j {
         }else if(input.contains("qyxx_basic_canal")){
           DeleteOperate.clearBasic(qyxx_id)
         }else{
-          ""
+          Array("")
         }
       }
-      final_list += deleteOp
+
+      for (item <- deleteOp) {
+        final_list += item
+      }
 
       var i = 0
       var str = "messageId_"+i
