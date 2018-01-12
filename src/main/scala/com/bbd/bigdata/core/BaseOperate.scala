@@ -389,6 +389,7 @@ trait BaseOperate {
            |MERGE (a:Entity:Company {bbd_qyxx_id: "${args("source_id")}" })
            |${CommonFunctions.getCompanyProperty("a")}
            |ON CREATE SET a.create_time = timestamp()
+           |SET a.name = "${args("source_name")}"
            |SET a.update_time = timestamp()
            |WITH a
            |MERGE (b:Entity:Company {bbd_qyxx_id: "${args("destination_id")}" })
