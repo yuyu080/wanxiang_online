@@ -53,6 +53,7 @@ object CompositeOperate extends BaseOperate {
     val relation_type = "INVEST"
     val role_name = info.get("shareholder_type").toString
     val destination_id = info.get("bbd_qyxx_id").toString
+    val name_compid = info.get("name_compid").toString
     val bbd_role_id = CommonFunctions.md5(source_name + destination_id + relation_type + role_name)
     val bbd_isinvest_role_id = CommonFunctions.md5(source_name + destination_id + "Isinvest")
 
@@ -60,7 +61,6 @@ object CompositeOperate extends BaseOperate {
       "table_name" -> info.get("canal_table").toString.replace("_canal", ""),
       "event_type" -> info.get("canal_eventtype").toString,
       "source_label" -> {
-        val name_compid = info.get("name_compid").toString
         if (name_compid == "0" || name_compid == "3") "Company" else if (name_compid == "1") "Person" else ""
       },
       "source_id" -> source_id,
@@ -73,7 +73,13 @@ object CompositeOperate extends BaseOperate {
       "ratio" -> info.get("invest_ratio").toString
     )
 
-    operateRelationEdge(args)
+    // 剔除股东类型为2的特殊股东
+    if (name_compid != "2") {
+      operateRelationEdge(args)
+    } else {
+      ("qyxx_gdxx_canal", Array())
+    }
+
   }
 
   def qyxxBaxx(info: com.alibaba.fastjson.JSONObject): Tuple2[String, Array[String]] = {
