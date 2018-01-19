@@ -59,7 +59,7 @@ object WanxiangSinkToNeo4j {
       val thread_id = Thread.currentThread().getId
       val addr = InetAddress.getLocalHost
       val machine_ip = addr.getHostAddress
-      println(machine_ip + " : " + thread_id + " : " + System.currentTimeMillis() + " : " + input)
+      //println(machine_ip + " : " + thread_id + " : " + System.currentTimeMillis() + " : " + input)
 
       val session = driver.session()
       var table_name = ""
