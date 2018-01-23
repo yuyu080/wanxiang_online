@@ -18,6 +18,7 @@ import org.neo4j.driver.v1.exceptions.{ClientException, DatabaseException, Trans
 
 import scala.util.Random
 import com.alibaba.fastjson._
+import com.bbd.bigdata.util.CommonFunctions
 
 import scala.util.control._
 import org.apache.log4j.Logger
@@ -59,7 +60,9 @@ object WanxiangSinkToNeo4j {
       val thread_id = Thread.currentThread().getId
       val addr = InetAddress.getLocalHost
       val machine_ip = addr.getHostAddress
-      //println(machine_ip + " : " + thread_id + " : " + System.currentTimeMillis() + " : " + input)
+
+      val check_message = CommonFunctions.analysis_input(input)
+      println(machine_ip + " : " + thread_id + " : " + System.currentTimeMillis() + " : " + check_message)
 
       val session = driver.session()
       var table_name = ""

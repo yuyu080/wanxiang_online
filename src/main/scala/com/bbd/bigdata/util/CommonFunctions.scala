@@ -152,4 +152,49 @@ object CommonFunctions {
     )
   }
 
+
+  def analysis_input(input: String): String = {
+    val input_obj = jsonToObj(input)
+    val json_obj = new JSONObject()
+    var i = 0
+    var str = "messageId_"+i
+
+    if(input_obj.get(str)!=null){
+      val in = input_obj.get(str).toString
+      val message = jsonToObj(in)
+      val canal_table = message.get("canal_table")
+      json_obj.put("canal_table",canal_table)
+    }
+
+    json_obj.put("bbd_qyxx_id","@")
+    json_obj.put("bbd_xgxx_id","@")
+    json_obj.put("source_id","@")
+
+    while(input_obj.get(str)!=null){
+      val in = input_obj.get(str).toString
+      i = i+1
+      str = "messageId_"+i
+      val message = jsonToObj(in)
+      if(message.containsKey("frname_id")){
+        json_obj.put("source_id",json_obj.get("source_id")+message.get("frname_id").toString+"@")
+      }else if(message.containsKey("shareholder_id")){
+        json_obj.put("source_id",json_obj.get("source_id")+message.get("shareholder_id").toString+"@")
+      }else if(message.containsKey("name_id")){
+        json_obj.put("source_id",json_obj.get("source_id")+message.get("name_id").toString+"@")
+      }else if(message.containsKey("bbd_branch_id")){
+        json_obj.put("source_id",json_obj.get("source_id")+message.get("bbd_branch_id").toString+"@")
+      }
+
+      if(message.containsKey("bbd_qyxx_id")){
+        json_obj.put("bbd_qyxx_id",json_obj.get("bbd_qyxx_id")+message.get("bbd_qyxx_id").toString+"@")
+      }
+
+      if(message.containsKey("bd_xgxx_id")){
+        json_obj.put("bbd_xgxx_id",json_obj.get("bbd_xgxx_id")+message.get("bbd_xgxx_id").toString+"@")
+      }
+    }
+
+    json_obj.toString
+  }
+
 }
