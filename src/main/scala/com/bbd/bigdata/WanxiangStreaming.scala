@@ -34,8 +34,8 @@ object WanxiangStreaming {
     config.enableExternalizedCheckpoints(ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION)
     //env.setStateBackend(new RocksDBStateBackend("hdfs:///checkpoints-data/")
 
-    //maximize throughput
-    env.setBufferTimeout(-1)
+
+    env.setBufferTimeout(1000*60)
     env.enableCheckpointing(15*60*1000)
     env.getCheckpointConfig.setMinPauseBetweenCheckpoints(1000)
     env.getCheckpointConfig.setMaxConcurrentCheckpoints(1)
@@ -46,8 +46,11 @@ object WanxiangStreaming {
     val params = ParameterTool.fromArgs(args)
     //定义kafka 配置,KAFKA_BROKER和消费组
     val KAFKA_BROKER = if (params.has("broker_list")) params.get("broker_list") else "c6node15:9092,c6node16:9092,c6node17:9092"
+
     val TRANSACTION_GROUP = if (params.has("group")) params.get("group") else "bbd_wanxiang_online_20171228"
+
     val topic = if(params.has("topic"))  params.get("topic") else "wanxiang_canal_20171227"
+
     val offset = if(params.has("offset"))  params.get("offset") else "latest"
     //初始化kafka topic
     val kafkaProps = new Properties()
