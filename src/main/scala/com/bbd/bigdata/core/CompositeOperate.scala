@@ -17,9 +17,23 @@ object CompositeOperate extends BaseOperate {
     val relation_type = "LEGAL"
     val role_name = ""
     val destination_id = info.get("bbd_qyxx_id").toString
-    val bbd_role_id = CommonFunctions.md5(source_name + destination_id + relation_type + role_name)
-    val bbd_isinvest_role_id = CommonFunctions.md5(source_name + destination_id + "Isinvest")
-
+    // 排除特殊ID,该ID由一个''字符串生成
+    val bbd_role_id = {
+      val id = CommonFunctions.md5(source_name + destination_id + relation_type + role_name)
+      if (id != "d41d8cd98f00b204e9800998ecf8427e") {
+        id
+      } else {
+        CommonFunctions.md5(System.nanoTime.toString)
+      }
+    }
+    val bbd_isinvest_role_id = {
+      val id = CommonFunctions.md5(source_name + destination_id + "Isinvest")
+      if (id != "d41d8cd98f00b204e9800998ecf8427e") {
+        id
+      } else {
+        CommonFunctions.md5(System.nanoTime.toString)
+      }
+    }
     val args = Map(
       "table_name" -> info.get("canal_table").toString.replace("_canal", ""),
       "event_type" -> info.get("canal_eventtype").toString,
@@ -54,9 +68,23 @@ object CompositeOperate extends BaseOperate {
     val role_name = info.get("shareholder_type").toString
     val destination_id = info.get("bbd_qyxx_id").toString
     val name_compid = info.get("name_compid").toString
-    val bbd_role_id = CommonFunctions.md5(source_name + destination_id + relation_type + role_name)
-    val bbd_isinvest_role_id = CommonFunctions.md5(source_name + destination_id + "Isinvest")
-
+    // 排除特殊ID,该ID由一个''字符串生成
+    val bbd_role_id = {
+      val id = CommonFunctions.md5(source_name + destination_id + relation_type + role_name)
+      if (id != "d41d8cd98f00b204e9800998ecf8427e") {
+        id
+      } else {
+        CommonFunctions.md5(System.nanoTime.toString)
+      }
+    }
+    val bbd_isinvest_role_id = {
+      val id = CommonFunctions.md5(source_name + destination_id + "Isinvest")
+      if (id != "d41d8cd98f00b204e9800998ecf8427e") {
+        id
+      } else {
+        CommonFunctions.md5(System.nanoTime.toString)
+      }
+    }
     val args = Map(
       "table_name" -> info.get("canal_table").toString.replace("_canal", ""),
       "event_type" -> info.get("canal_eventtype").toString,
@@ -88,8 +116,23 @@ object CompositeOperate extends BaseOperate {
     val relation_type = info.get("type").toString.toUpperCase
     val role_name = info.get("position").toString
     val destination_id = info.get("bbd_qyxx_id").toString
-    val bbd_role_id = CommonFunctions.md5(source_name + destination_id + relation_type + role_name)
-    val bbd_isinvest_role_id = CommonFunctions.md5(source_name + destination_id + "Isinvest")
+    // 排除特殊ID,该ID由一个''字符串生成
+    val bbd_role_id = {
+      val id = CommonFunctions.md5(source_name + destination_id + relation_type + role_name)
+      if (id != "d41d8cd98f00b204e9800998ecf8427e") {
+        id
+      } else {
+        CommonFunctions.md5(System.nanoTime.toString)
+      }
+    }
+    val bbd_isinvest_role_id = {
+      val id = CommonFunctions.md5(source_name + destination_id + "Isinvest")
+      if (id != "d41d8cd98f00b204e9800998ecf8427e") {
+        id
+      } else {
+        CommonFunctions.md5(System.nanoTime.toString)
+      }
+    }
 
     val args = Map(
       "table_name" -> info.get("canal_table").toString.replace("_canal", ""),
@@ -113,9 +156,23 @@ object CompositeOperate extends BaseOperate {
     val relation_type = "BRANCH"
     val role_name = "分支机构"
     val destination_id = info.get("bbd_qyxx_id").toString
-    val bbd_role_id = CommonFunctions.md5(source_name + destination_id + relation_type + role_name)
-    val bbd_isinvest_role_id = CommonFunctions.md5(source_name + destination_id + "Isinvest")
-
+    // 排除特殊ID,该ID由一个''字符串生成
+    val bbd_role_id = {
+      val id = CommonFunctions.md5(source_name + destination_id + relation_type + role_name)
+      if (id != "d41d8cd98f00b204e9800998ecf8427e") {
+        id
+      } else {
+        CommonFunctions.md5(System.nanoTime.toString)
+      }
+    }
+    val bbd_isinvest_role_id = {
+      val id = CommonFunctions.md5(source_name + destination_id + "Isinvest")
+      if (id != "d41d8cd98f00b204e9800998ecf8427e") {
+        id
+      } else {
+        CommonFunctions.md5(System.nanoTime.toString)
+      }
+    }
     val args = Map(
       "table_name" -> info.get("canal_table").toString.replace("_canal", ""),
       "event_type" -> info.get("canal_eventtype").toString,
